@@ -1,0 +1,333 @@
+// Template to generate source for "Scaled Dot Product Attention" used by GPT2.
+// Given an input sequence of shape [s, w] where `s` is the sequence length and `w`
+// is the the number of vocab elements used to implement each token.
+// The input sequence is acted on by a Conv1D layer to generate a sequence of shape
+// [s, 3 * w]. Each element in the output sequence is a concatenation of
+// `w` elemts representing the Q, K, V tensors.
+// Multi-head attention is performed on this output using the Q, K, V tensors.
+// GPT2 uses 12 attension heads in Multi-head attention.
+// Therefore the Q, K, V tensors will be split onto 12 parts that independently go through the flow
+// The input dimensions of each flow are [s, w // 12] which is around 64 units per sequence element.
+// 
+// input -> Conv1D -> [Q, K, V] -> Divide by 12 -> 12 * [q, k, v] -> MultiHead Attention in Parallel
+// 
+// Within each Multi-Head Attention Block
+//  - We muliply q, k as (q * k transpose)
+// The q for every word in the sequence is multiple with k transpose to see how it reacts with
+// every other word in the sequence producing a tensor of size [s, s] where s is sequence length.
+// The [s, s] is masked with a lower triangular to prevent tokens from attending to tokens taht are after them.
+// This output is then softmaxed.
+// the softmaxed [s, s] is multipled by the [s, (w // 12))] v vector(v from the initial q, k. v) to produce
+// an [s, (w // 12)] tensor as output.
+// The 12 Multi-Head Attention Block are concantenated to product a output of shape [s, w].
+
+
+
+// GPT2Attention(
+//    (c_attn): Conv1D()
+//    (c_proj): Conv1D()
+//    (attn_dropout): Dropout(p=0.1, inplace=False)
+//    (resid_dropout): Dropout(p=0.1, inplace=False)
+// )
+// # The first Conv1d creates tensor of shape [s, 3 * w] which we split in three tensors
+// # it appears to be a basic matrix multiply followed by addition.
+// # output size of convolution depends on the dimensions of the weight / bias matrix.
+// q, k, v = Conv1D_1(w1, b1, input).split(embedding_size) 
+// # furher divide q, k, v into smaller chunks, one for each attention head (num_attn_heads=12)
+// # In GPT 2 the shapes of q, k, v will be [s, 64] where s is the seqence length
+// q, k, v = q.split(embedding_size / num_heads), k.split(embedding_size / num_heads), v.split(embedding_size / num_heads)
+// for head in attention_heads:
+//      # temp will be size [s, s]
+//      temp = q * k.transpose() 
+//      # mask out sequence to prevent elems from attending to elems after them
+//      temp = mask(temp)
+//      # apply soft max for each sequene element
+//      temp = softmax(temp)
+//      # apply dropout (skip during training)
+//      temp = dropout(temp)
+//      # multiply by value tensor v to generate output
+//      output = temp * v
+// # concatenate attention output from all heads to produce [s, w] tensor
+// final_output = concat(attention_output) 
+// # Use the second Conv1D layer to produce tensor of size [s, w]
+// final_output = Conv1D_2(w2, b2, final_output)
+// # apply the second dropout
+// final_output = dropout(final_output)
+// # final output is tensor of size [s, w]
+// return final_output
+
+// TODO - input should contain emeddings for all emeddings in a sequence
+// shape should be [s, w]
+
+// START_METHODS
+#include <arm_neon.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+// Conv1D c_attn
+// Matrix with shape [{C_ATTN_EMBEDDING_SIZE_ROW}, {C_ATTN_EMBEDDING_SIZE_COL}]
+static float32_t** {NAME}_c_attn_weights = NULL;
+// Vector of size {C_ATTN_EMBEDDING_SIZE_COL}
+static float32_t* {NAME}_c_attn_bias = NULL;
+
+// Conv1D c_proj
+// Matrix with shape [{C_PROJ_EMBEDDING_SIZE_ROW}, {C_PROJ_EMBEDDING_SIZE_COL}]
+static float32_t** {NAME}_c_proj_weights = NULL;
+// Vector of size {C_PROJ_EMBEDDING_SIZE_COL}
+static float32_t* {NAME}_c_proj_bias = NULL;
+
+
+
+// Matrix of size [{SEQUENCE_LENGTH}, {C_ATTN_EMBEDDING_SIZE_COL}]
+// used for storing intermediate values in c_attn conv1d step
+static float32_t** {NAME}_c_attn_temp = NULL;
+// Matrix of size [{SEQUENCE_LENGTH}, {C_PROJ_EMBEDDING_SIZE_COL}]
+// used for storing intermediate values in multi-head attention
+static float32_t** {NAME}_multi_head_temp = NULL;
+// Matrix to store mask used in multi head attention  of size 
+// [{SEQUENCE_LENGTH}, {SEQUENCE_LENGTH}]
+static float32_t** {NAME}_multi_head_attention_mask = NULL;
+
+// TODO - precompute and make this const;
+int64_t C_ATTN_OUTPUT_Q_OFFSET = 0;
+int64_t C_ATTN_OUTPUT_K_OFFSET = {C_ATTN_EMBEDDING_SIZE_ROW};
+int64_t C_ATTN_OUTPUT_V_OFFSET = 2 * {C_ATTN_EMBEDDING_SIZE_ROW};
+
+// Called only once at startup to populate the attention mask
+// so we can skip unrolling
+void {NAME}_populate_attention_mask() {
+    for (int i = 0; i < {SEQUENCE_LENGTH}; i += 1) {
+        for (int j = 0; j < {SEQUENCE_LENGTH}; j += 1) {
+            float value = (j <= i ? 1.0 : 0.0);
+            {NAME}_multi_head_attention_mask[i][j] = value;
+        }
+    }
+}
+
+// Initializes the weights used in the attention layer.
+// Must be called before calling {NAME}_attention.
+void {NAME}_initialize_heap_memory() {
+    // TODO - initialize memory and populate weights
+    {NAME}_c_attn_weights = (float32_t**)malloc(sizeof(float32_t*) * {C_ATTN_EMBEDDING_SIZE_ROW});
+    {NAME}_c_attn_bias = (float32_t*)malloc(sizeof(float32_t) * {C_ATTN_EMBEDDING_SIZE_COL});
+    {NAME}_c_proj_weights = (float32_t**)malloc(sizeof(float32_t*) * {C_PROJ_EMBEDDING_SIZE_ROW});
+    {NAME}_c_proj_bias = (float32_t*)malloc(sizeof(float32_t) * {C_PROJ_EMBEDDING_SIZE_COL});
+
+    // Initialize nested array memory to store embeddings.
+    // UNROLL_START start=0,end=({C_ATTN_EMBEDDING_SIZE_ROW}) param1=idx
+    {NAME}_c_attn_weights[param1] = (float32_t*)malloc(sizeof(float32_t) * {C_ATTN_EMBEDDING_SIZE_COL});
+    // UNROLL_END
+
+    // UNROLL_START start=0,end=({C_PROJ_EMBEDDING_SIZE_ROW}) param1=idx
+    {NAME}_c_attn_weights[param1] = (float32_t*)malloc(sizeof(float32_t) * {C_PROJ_EMBEDDING_SIZE_COL});
+    // UNROLL_END
+
+    // Copy embedding values in to allocated memory
+    // UNROLL_START start=0,end=({C_ATTN_EMBEDDING_SIZE_ROW}) param1=idx
+    float32_t c_attn_param1[{C_ATTN_EMBEDDING_SIZE_COL}] = {C_ATTN_EMBEDDING_param1};
+    memcpy({NAME}_c_attn_weights[param1], c_attn_param1, sizeof(float32_t) * {C_ATTN_EMBEDDING_SIZE_COL});
+    // UNROLL_END
+
+    // UNROLL_START start=0,end=({C_PROJ_EMBEDDING_SIZE_ROW}) param1=idx
+    float32_t c_proj_param1[{C_PROJ_EMBEDDING_SIZE_COL}] = {C_PROJ_EMBEDDING_param1};
+    memcpy({NAME}_c_proj_weights[param1], c_proj_param1, sizeof(float32_t) * {C_PROJ_EMBEDDING_SIZE_COL});
+    // UNROLL_END
+
+    float32_t c_attn_bias[{C_ATTN_EMBEDDING_SIZE_COL}] = {C_ATTN_BIAS};
+    float32_t c_proj_bias[{C_PROJ_EMBEDDING_SIZE_COL}] = {C_PROJ_BIAS};
+    memcpy({NAME}_c_attn_bias, c_attn_bias, sizeof(float32_t) * {C_ATTN_EMBEDDING_SIZE_COL});
+    memcpy({NAME}_c_proj_bias, c_proj_bias, sizeof(float32_t) * {C_PROJ_EMBEDDING_SIZE_COL});
+
+    // Initialize memory for attention intermediate states
+    {NAME}_c_attn_temp = (float32_t**)malloc(sizeof(float32_t*) * {SEQUENCE_LENGTH});
+    {NAME}_multi_head_temp = (float32_t**)malloc(sizeof(float32_t*) * {SEQUENCE_LENGTH});
+    {NAME}_multi_head_attention_mask = (float32_t**)malloc(sizeof(float32_t*) * {SEQUENCE_LENGTH});
+
+    // UNROLL_START start=0,end=({SEQUENCE_LENGTH}) param1=idx
+    {NAME}_c_attn_temp[param1] = (float32_t*)malloc(sizeof(float32_t) *  {C_ATTN_EMBEDDING_SIZE_COL});
+    {NAME}_multi_head_temp[param1] = (float32_t*)malloc(sizeof(float32_t) *  {C_PROJ_EMBEDDING_SIZE_COL});
+    {NAME}_multi_head_attention_mask[param1] = (float32_t*)malloc(sizeof(float32_t) * {SEQUENCE_LENGTH});
+    // UNROLL_END
+
+    // create the attention mask
+    {NAME}_populate_attention_mask();
+}
+
+static inline void {NAME}_c_attn_populate_cell(float32_t** input, float32_t** output, int64_t row_idx, int64_t cell_idx) {
+    float32_t temp = 0.0;
+    // UNROLL_START start=0,end={C_ATTN_EMBEDDING_SIZE_ROW} param1=idx
+    temp += input[row_idx][param1] * {NAME}_c_attn_weights[param1][cell_idx];
+    // UNROLL_END
+    output[row_idx][cell_idx] = temp + {NAME}_c_attn_bias[cell_idx];
+}
+
+static inline void {NAME}_c_attn_populate_row(float32_t** input, float32_t** output, int64_t row_idx) {
+    // UNROLL_START start=0,end={C_ATTN_EMBEDDING_SIZE_COL} param1=idx
+    {NAME}_c_attn_populate_cell(input, output, row_idx, param1);
+    // UNROLL_END
+}
+
+static inline void {NAME}_apply_c_attn_conv1d(float32_t** input, float32_t** output) {
+    // UNROLL_START start=0,end={SEQUENCE_LENGTH} param1=idx
+    {NAME}_c_attn_populate_row(input, output, param1);
+    // UNROLL_END
+}
+
+static inline void {NAME}_populate_q_k_cell(float32_t** input, float32_t* output, 
+                                int16_t head_idx, int16_t seq_idx, int16_t cell_idx) {
+    float32_t* q = input[seq_idx] + C_ATTN_OUTPUT_Q_OFFSET + (head_idx * ({EMBEDDING_SIZE}/{NUM_HEADS}));
+    float32_t* k = input[cell_idx] + C_ATTN_OUTPUT_K_OFFSET + (head_idx * ({EMBEDDING_SIZE}/{NUM_HEADS}));
+
+    float32_t temp = 0.0;
+    // q * k.transpose
+    // [s, 64] * [s, 64].t
+    // UNROLL_START start=0,end=({EMBEDDING_SIZE}/{NUM_HEADS}) param1=idx
+    temp += (*(q + param1)) * (*(k + param1))
+    // UNROLL_END
+    output[seq_idx + (seq_idx * {SEQUENCE_LENGTH})] = temp;
+}
+
+static inline void {NAME}_populate_q_k_sequence(float32_t** input, float32_t* output, int16_t head_idx, int16_t seq_idx) {
+    // UNROLL_START start=0,end=({SEQUENCE_LENGTH}) param1=idx
+    {NAME}_populate_q_k_cell(input, output, head_idx, seq_idx, param1);
+    // UNROLL_END
+}
+
+static inline void {NAME}_softmax_compute(float32_t* input, int16_t seq_idx) {
+    // We are assuming that softmax is to be computed for each sequence, 
+    // not across sequences in the [s, s] matrix
+    float32_t seq_sum = 0.0;
+    // Compute the sum of exponents for each elemt in sequence that is not masked
+    // UNROLL_START start=0,end=({SEQUENCE_LENGTH}) param1=idx
+    seq_sum += exp(input[param1 + (seq_idx * {SEQUENCE_LENGTH})]) * {NAME}_multi_head_attention_mask[seq_idx][param1];
+    // UNROLL_END
+
+    // Divide each unmasked elem by row sum
+    // softmax(xi) = exp(xi) / sum([exp(xj) for xj in sequence])
+    // UNROLL_START start=0,end=({SEQUENCE_LENGTH}) param1=idx
+    input[param1 + (seq_idx * {SEQUENCE_LENGTH})] = (exp(input[param1 + (seq_idx * {SEQUENCE_LENGTH})]) * {NAME}_multi_head_attention_mask[seq_idx][param1]) / seq_sum;
+    // UNROLL_END
+}
+
+static inline void {NAME}_populate_qk_v_cell(
+    float32_t** input,
+    float32_t* qk,
+    float32_t**  output,
+    int16_t head_idx,
+    int16_t seq_idx,
+    int16_t cell_idx
+) {
+    float32_t temp = 0.0;
+    // UNROLL_START start=0,end=({SEQUENCE_LENGTH}) param1=idx
+    temp += qk[param1 + (seq_idx * {SEQUENCE_LENGTH})] * (*(input[param1] + C_ATTN_OUTPUT_V_OFFSET + param1));
+    // UNROLL_END
+
+    // populate in the output for given sequence and head
+    output[seq_idx][cell_idx + (head_idx * {EMBEDDING_SIZE}/{NUM_HEADS})] = temp;
+}
+
+static inline void {NAME}_populate_qk_v_sequence(
+    float32_t** input,
+    float32_t* qk,
+    float32_t** output,
+    int16_t head_idx,
+    int16_t seq_idx
+) {
+    // UNROLL_START start=0,end=({EMBEDDING_SIZE}/{NUM_HEADS}) param1=idx
+    {NAME}_populate_qk_v_cell(input, qk, output, head_idx, seq_idx, param1);
+    // UNROLL_END
+}
+
+static inline void {NAME}_compute_attention_for_head(float32_t** input, float32_t**  output, int16_t head_idx) {
+    float temp[{SEQUENCE_LENGTH}][{SEQUENCE_LENGTH}];
+    // UNROLL_START start=0,end=({SEQUENCE_LENGTH}) param1=idx
+    {NAME}_populate_q_k_sequence(input, &temp[0][0], head_idx, param1);
+    // UNROLL_END
+
+    // compute softmax ensuring each sequence only attends to sequences that came before it
+    // UNROLL_START start=0,end=({SEQUENCE_LENGTH}) param1=idx
+    {NAME}_softmax_compute(&temp[0][0], param1);
+    // UNROLL_END
+
+    // multiple by v [s, s] * [s, 64] -> [s, 64]
+    // UNROLL_START start=0,end=({SEQUENCE_LENGTH}) param1=idx
+    {NAME}_populate_qk_v_sequence(input, &temp[0][0], output, head_idx, param1);
+    // UNROLL_END
+}
+
+
+static inline void {NAME}_compute_multihead_attention(float32_t** input, float32_t**  output) {
+    // UNROLL_START start=0,end={NUM_HEADS} head_idx=idx
+    {NAME}_compute_attention_for_head(input, output, head_idx);
+    // UNROLL_END
+}
+
+
+static inline void {NAME}_c_proj_populate_cell(float32_t** input, float32_t** output, int64_t row_idx, int cell_idx) {
+    float32_t temp = 0.0;
+    // UNROLL_START start=0,end={C_PROJ_EMBEDDING_SIZE_COL} param1=idx
+    temp += input[row_idx][param1] * {NAME}_c_proj_weights[param1][cell_idx];
+    // UNROLL_END
+    output[row_idx][cell_idx] = temp + {NAME}_c_proj_bias[cell_idx];
+}
+
+static inline void {NAME}_c_proj_populate_row(float32_t** input, float32_t** output, int64_t row_idx) {
+    // UNROLL_START start=0,end={C_PROJ_EMBEDDING_SIZE_COL} param1=idx
+    {NAME}_c_proj_populate_cell(input, output, row_idx, param1);
+    // UNROLL_END
+}
+
+static void {NAME}_apply_c_proj_conv1d(float32_t** input, float32_t** output) {
+    // UNROLL_START start=0,end={SEQUENCE_LENGTH} param1=idx
+    {NAME}_c_proj_populate_row(input, output, param1);
+    // UNROLL_END
+}
+
+/**
+ * Computes multi-head attention on the supplied sequence of embeddings of shape [s, w]
+ * where s is the the number of elements in the sequence and w is the size of the embedding.
+ * 
+ * @param input List[List[float]]: [s, w] mapping of sequence to embedding.
+ * @param output Output of shape [s, w]
+ * 
+ * Interpolated Params:
+ * 
+ *  - sequence length s: {SEQUENCE_LENGTH}
+ *  - embedding size w: {EMBEDDING_SIZE}
+ *  - num heads h: {NUM_HEADS}
+ */
+void {NAME}_attention(float32_t** input, float32_t** output) {
+    // apply c_attn conv1d
+    // [s, w] * [w * c] -> [s, c]
+    {NAME}_apply_c_attn_conv1d(input, {NAME}_c_attn_temp);
+
+    // split into Q, K, V for each sequence of shape [s, {C_ATTN_EMBEDDING_SIZE_COL / 3}]
+    // split into {NUM_HEADS} heads such that for each head we have q, k, v = Q.split({NUM_HEADS}), K.split({NUM_HEADS}), V.split({NUM_HEADS}) 
+    // calculate attention for each head
+    // finally combine value from all attention heads to give [s, {C_PROJ_EMBEDDING_SIZE_COL}]
+    {NAME}_compute_multihead_attention({NAME}_c_attn_temp, {NAME}_multi_head_temp);
+
+    // apply c_proj conv1d
+    // [s, w] * [w, w]
+    {NAME}_apply_c_proj_conv1d({NAME}_multi_head_temp, output);
+}
+
+void call_attention(int argc, char** argv) {
+    float32_t** input = (float32_t**)malloc(sizeof(float32_t*) * {SEQUENCE_LENGTH});
+    float32_t** output = (float32_t**)malloc(sizeof(float32_t*) * {SEQUENCE_LENGTH});
+    
+    // UNROLL_START start=0,end={SEQUENCE_LENGTH} param1=idx
+    input[param1] = (float32_t*)malloc(sizeof(float32_t) * {EMBEDDING_SIZE});
+    output[param1] = (float32_t*)malloc(sizeof(float32_t) * {EMBEDDING_SIZE});
+    memset(input[param1], 1.0, {EMBEDDING_SIZE});
+    memset(output[param1], 1.0, {EMBEDDING_SIZE});
+    // UNROLL_END
+
+    {NAME}_attention(input, output);
+
+    return;
+}
+
+// END_METHODS

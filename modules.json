@@ -1,0 +1,980 @@
+[
+    {
+        "transformer": {
+            "name": "transformer",
+            "type": "GPT2Model"
+        }
+    },
+    {
+        "transformer.wte": {
+            "name": "transformer.wte",
+            "type": "Embedding"
+        }
+    },
+    {
+        "transformer.wpe": {
+            "name": "transformer.wpe",
+            "type": "Embedding"
+        }
+    },
+    {
+        "transformer.drop": {
+            "name": "transformer.drop",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h": {
+            "name": "transformer.h",
+            "type": "ModuleList"
+        }
+    },
+    {
+        "transformer.h.0": {
+            "name": "transformer.h.0",
+            "type": "GPT2Block"
+        }
+    },
+    {
+        "transformer.h.0.ln_1": {
+            "name": "transformer.h.0.ln_1",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.0.attn": {
+            "name": "transformer.h.0.attn",
+            "type": "GPT2Attention"
+        }
+    },
+    {
+        "transformer.h.0.attn.c_attn": {
+            "name": "transformer.h.0.attn.c_attn",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.0.attn.c_proj": {
+            "name": "transformer.h.0.attn.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.0.attn.attn_dropout": {
+            "name": "transformer.h.0.attn.attn_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.0.attn.resid_dropout": {
+            "name": "transformer.h.0.attn.resid_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.0.ln_2": {
+            "name": "transformer.h.0.ln_2",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.0.mlp": {
+            "name": "transformer.h.0.mlp",
+            "type": "GPT2MLP"
+        }
+    },
+    {
+        "transformer.h.0.mlp.c_fc": {
+            "name": "transformer.h.0.mlp.c_fc",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.0.mlp.c_proj": {
+            "name": "transformer.h.0.mlp.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.0.mlp.act": {
+            "name": "transformer.h.0.mlp.act",
+            "type": "NewGELUActivation"
+        }
+    },
+    {
+        "transformer.h.0.mlp.dropout": {
+            "name": "transformer.h.0.mlp.dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.1": {
+            "name": "transformer.h.1",
+            "type": "GPT2Block"
+        }
+    },
+    {
+        "transformer.h.1.ln_1": {
+            "name": "transformer.h.1.ln_1",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.1.attn": {
+            "name": "transformer.h.1.attn",
+            "type": "GPT2Attention"
+        }
+    },
+    {
+        "transformer.h.1.attn.c_attn": {
+            "name": "transformer.h.1.attn.c_attn",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.1.attn.c_proj": {
+            "name": "transformer.h.1.attn.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.1.attn.attn_dropout": {
+            "name": "transformer.h.1.attn.attn_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.1.attn.resid_dropout": {
+            "name": "transformer.h.1.attn.resid_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.1.ln_2": {
+            "name": "transformer.h.1.ln_2",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.1.mlp": {
+            "name": "transformer.h.1.mlp",
+            "type": "GPT2MLP"
+        }
+    },
+    {
+        "transformer.h.1.mlp.c_fc": {
+            "name": "transformer.h.1.mlp.c_fc",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.1.mlp.c_proj": {
+            "name": "transformer.h.1.mlp.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.1.mlp.act": {
+            "name": "transformer.h.1.mlp.act",
+            "type": "NewGELUActivation"
+        }
+    },
+    {
+        "transformer.h.1.mlp.dropout": {
+            "name": "transformer.h.1.mlp.dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.2": {
+            "name": "transformer.h.2",
+            "type": "GPT2Block"
+        }
+    },
+    {
+        "transformer.h.2.ln_1": {
+            "name": "transformer.h.2.ln_1",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.2.attn": {
+            "name": "transformer.h.2.attn",
+            "type": "GPT2Attention"
+        }
+    },
+    {
+        "transformer.h.2.attn.c_attn": {
+            "name": "transformer.h.2.attn.c_attn",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.2.attn.c_proj": {
+            "name": "transformer.h.2.attn.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.2.attn.attn_dropout": {
+            "name": "transformer.h.2.attn.attn_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.2.attn.resid_dropout": {
+            "name": "transformer.h.2.attn.resid_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.2.ln_2": {
+            "name": "transformer.h.2.ln_2",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.2.mlp": {
+            "name": "transformer.h.2.mlp",
+            "type": "GPT2MLP"
+        }
+    },
+    {
+        "transformer.h.2.mlp.c_fc": {
+            "name": "transformer.h.2.mlp.c_fc",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.2.mlp.c_proj": {
+            "name": "transformer.h.2.mlp.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.2.mlp.act": {
+            "name": "transformer.h.2.mlp.act",
+            "type": "NewGELUActivation"
+        }
+    },
+    {
+        "transformer.h.2.mlp.dropout": {
+            "name": "transformer.h.2.mlp.dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.3": {
+            "name": "transformer.h.3",
+            "type": "GPT2Block"
+        }
+    },
+    {
+        "transformer.h.3.ln_1": {
+            "name": "transformer.h.3.ln_1",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.3.attn": {
+            "name": "transformer.h.3.attn",
+            "type": "GPT2Attention"
+        }
+    },
+    {
+        "transformer.h.3.attn.c_attn": {
+            "name": "transformer.h.3.attn.c_attn",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.3.attn.c_proj": {
+            "name": "transformer.h.3.attn.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.3.attn.attn_dropout": {
+            "name": "transformer.h.3.attn.attn_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.3.attn.resid_dropout": {
+            "name": "transformer.h.3.attn.resid_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.3.ln_2": {
+            "name": "transformer.h.3.ln_2",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.3.mlp": {
+            "name": "transformer.h.3.mlp",
+            "type": "GPT2MLP"
+        }
+    },
+    {
+        "transformer.h.3.mlp.c_fc": {
+            "name": "transformer.h.3.mlp.c_fc",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.3.mlp.c_proj": {
+            "name": "transformer.h.3.mlp.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.3.mlp.act": {
+            "name": "transformer.h.3.mlp.act",
+            "type": "NewGELUActivation"
+        }
+    },
+    {
+        "transformer.h.3.mlp.dropout": {
+            "name": "transformer.h.3.mlp.dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.4": {
+            "name": "transformer.h.4",
+            "type": "GPT2Block"
+        }
+    },
+    {
+        "transformer.h.4.ln_1": {
+            "name": "transformer.h.4.ln_1",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.4.attn": {
+            "name": "transformer.h.4.attn",
+            "type": "GPT2Attention"
+        }
+    },
+    {
+        "transformer.h.4.attn.c_attn": {
+            "name": "transformer.h.4.attn.c_attn",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.4.attn.c_proj": {
+            "name": "transformer.h.4.attn.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.4.attn.attn_dropout": {
+            "name": "transformer.h.4.attn.attn_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.4.attn.resid_dropout": {
+            "name": "transformer.h.4.attn.resid_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.4.ln_2": {
+            "name": "transformer.h.4.ln_2",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.4.mlp": {
+            "name": "transformer.h.4.mlp",
+            "type": "GPT2MLP"
+        }
+    },
+    {
+        "transformer.h.4.mlp.c_fc": {
+            "name": "transformer.h.4.mlp.c_fc",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.4.mlp.c_proj": {
+            "name": "transformer.h.4.mlp.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.4.mlp.act": {
+            "name": "transformer.h.4.mlp.act",
+            "type": "NewGELUActivation"
+        }
+    },
+    {
+        "transformer.h.4.mlp.dropout": {
+            "name": "transformer.h.4.mlp.dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.5": {
+            "name": "transformer.h.5",
+            "type": "GPT2Block"
+        }
+    },
+    {
+        "transformer.h.5.ln_1": {
+            "name": "transformer.h.5.ln_1",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.5.attn": {
+            "name": "transformer.h.5.attn",
+            "type": "GPT2Attention"
+        }
+    },
+    {
+        "transformer.h.5.attn.c_attn": {
+            "name": "transformer.h.5.attn.c_attn",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.5.attn.c_proj": {
+            "name": "transformer.h.5.attn.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.5.attn.attn_dropout": {
+            "name": "transformer.h.5.attn.attn_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.5.attn.resid_dropout": {
+            "name": "transformer.h.5.attn.resid_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.5.ln_2": {
+            "name": "transformer.h.5.ln_2",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.5.mlp": {
+            "name": "transformer.h.5.mlp",
+            "type": "GPT2MLP"
+        }
+    },
+    {
+        "transformer.h.5.mlp.c_fc": {
+            "name": "transformer.h.5.mlp.c_fc",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.5.mlp.c_proj": {
+            "name": "transformer.h.5.mlp.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.5.mlp.act": {
+            "name": "transformer.h.5.mlp.act",
+            "type": "NewGELUActivation"
+        }
+    },
+    {
+        "transformer.h.5.mlp.dropout": {
+            "name": "transformer.h.5.mlp.dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.6": {
+            "name": "transformer.h.6",
+            "type": "GPT2Block"
+        }
+    },
+    {
+        "transformer.h.6.ln_1": {
+            "name": "transformer.h.6.ln_1",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.6.attn": {
+            "name": "transformer.h.6.attn",
+            "type": "GPT2Attention"
+        }
+    },
+    {
+        "transformer.h.6.attn.c_attn": {
+            "name": "transformer.h.6.attn.c_attn",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.6.attn.c_proj": {
+            "name": "transformer.h.6.attn.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.6.attn.attn_dropout": {
+            "name": "transformer.h.6.attn.attn_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.6.attn.resid_dropout": {
+            "name": "transformer.h.6.attn.resid_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.6.ln_2": {
+            "name": "transformer.h.6.ln_2",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.6.mlp": {
+            "name": "transformer.h.6.mlp",
+            "type": "GPT2MLP"
+        }
+    },
+    {
+        "transformer.h.6.mlp.c_fc": {
+            "name": "transformer.h.6.mlp.c_fc",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.6.mlp.c_proj": {
+            "name": "transformer.h.6.mlp.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.6.mlp.act": {
+            "name": "transformer.h.6.mlp.act",
+            "type": "NewGELUActivation"
+        }
+    },
+    {
+        "transformer.h.6.mlp.dropout": {
+            "name": "transformer.h.6.mlp.dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.7": {
+            "name": "transformer.h.7",
+            "type": "GPT2Block"
+        }
+    },
+    {
+        "transformer.h.7.ln_1": {
+            "name": "transformer.h.7.ln_1",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.7.attn": {
+            "name": "transformer.h.7.attn",
+            "type": "GPT2Attention"
+        }
+    },
+    {
+        "transformer.h.7.attn.c_attn": {
+            "name": "transformer.h.7.attn.c_attn",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.7.attn.c_proj": {
+            "name": "transformer.h.7.attn.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.7.attn.attn_dropout": {
+            "name": "transformer.h.7.attn.attn_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.7.attn.resid_dropout": {
+            "name": "transformer.h.7.attn.resid_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.7.ln_2": {
+            "name": "transformer.h.7.ln_2",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.7.mlp": {
+            "name": "transformer.h.7.mlp",
+            "type": "GPT2MLP"
+        }
+    },
+    {
+        "transformer.h.7.mlp.c_fc": {
+            "name": "transformer.h.7.mlp.c_fc",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.7.mlp.c_proj": {
+            "name": "transformer.h.7.mlp.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.7.mlp.act": {
+            "name": "transformer.h.7.mlp.act",
+            "type": "NewGELUActivation"
+        }
+    },
+    {
+        "transformer.h.7.mlp.dropout": {
+            "name": "transformer.h.7.mlp.dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.8": {
+            "name": "transformer.h.8",
+            "type": "GPT2Block"
+        }
+    },
+    {
+        "transformer.h.8.ln_1": {
+            "name": "transformer.h.8.ln_1",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.8.attn": {
+            "name": "transformer.h.8.attn",
+            "type": "GPT2Attention"
+        }
+    },
+    {
+        "transformer.h.8.attn.c_attn": {
+            "name": "transformer.h.8.attn.c_attn",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.8.attn.c_proj": {
+            "name": "transformer.h.8.attn.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.8.attn.attn_dropout": {
+            "name": "transformer.h.8.attn.attn_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.8.attn.resid_dropout": {
+            "name": "transformer.h.8.attn.resid_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.8.ln_2": {
+            "name": "transformer.h.8.ln_2",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.8.mlp": {
+            "name": "transformer.h.8.mlp",
+            "type": "GPT2MLP"
+        }
+    },
+    {
+        "transformer.h.8.mlp.c_fc": {
+            "name": "transformer.h.8.mlp.c_fc",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.8.mlp.c_proj": {
+            "name": "transformer.h.8.mlp.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.8.mlp.act": {
+            "name": "transformer.h.8.mlp.act",
+            "type": "NewGELUActivation"
+        }
+    },
+    {
+        "transformer.h.8.mlp.dropout": {
+            "name": "transformer.h.8.mlp.dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.9": {
+            "name": "transformer.h.9",
+            "type": "GPT2Block"
+        }
+    },
+    {
+        "transformer.h.9.ln_1": {
+            "name": "transformer.h.9.ln_1",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.9.attn": {
+            "name": "transformer.h.9.attn",
+            "type": "GPT2Attention"
+        }
+    },
+    {
+        "transformer.h.9.attn.c_attn": {
+            "name": "transformer.h.9.attn.c_attn",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.9.attn.c_proj": {
+            "name": "transformer.h.9.attn.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.9.attn.attn_dropout": {
+            "name": "transformer.h.9.attn.attn_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.9.attn.resid_dropout": {
+            "name": "transformer.h.9.attn.resid_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.9.ln_2": {
+            "name": "transformer.h.9.ln_2",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.9.mlp": {
+            "name": "transformer.h.9.mlp",
+            "type": "GPT2MLP"
+        }
+    },
+    {
+        "transformer.h.9.mlp.c_fc": {
+            "name": "transformer.h.9.mlp.c_fc",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.9.mlp.c_proj": {
+            "name": "transformer.h.9.mlp.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.9.mlp.act": {
+            "name": "transformer.h.9.mlp.act",
+            "type": "NewGELUActivation"
+        }
+    },
+    {
+        "transformer.h.9.mlp.dropout": {
+            "name": "transformer.h.9.mlp.dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.10": {
+            "name": "transformer.h.10",
+            "type": "GPT2Block"
+        }
+    },
+    {
+        "transformer.h.10.ln_1": {
+            "name": "transformer.h.10.ln_1",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.10.attn": {
+            "name": "transformer.h.10.attn",
+            "type": "GPT2Attention"
+        }
+    },
+    {
+        "transformer.h.10.attn.c_attn": {
+            "name": "transformer.h.10.attn.c_attn",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.10.attn.c_proj": {
+            "name": "transformer.h.10.attn.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.10.attn.attn_dropout": {
+            "name": "transformer.h.10.attn.attn_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.10.attn.resid_dropout": {
+            "name": "transformer.h.10.attn.resid_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.10.ln_2": {
+            "name": "transformer.h.10.ln_2",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.10.mlp": {
+            "name": "transformer.h.10.mlp",
+            "type": "GPT2MLP"
+        }
+    },
+    {
+        "transformer.h.10.mlp.c_fc": {
+            "name": "transformer.h.10.mlp.c_fc",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.10.mlp.c_proj": {
+            "name": "transformer.h.10.mlp.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.10.mlp.act": {
+            "name": "transformer.h.10.mlp.act",
+            "type": "NewGELUActivation"
+        }
+    },
+    {
+        "transformer.h.10.mlp.dropout": {
+            "name": "transformer.h.10.mlp.dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.11": {
+            "name": "transformer.h.11",
+            "type": "GPT2Block"
+        }
+    },
+    {
+        "transformer.h.11.ln_1": {
+            "name": "transformer.h.11.ln_1",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.11.attn": {
+            "name": "transformer.h.11.attn",
+            "type": "GPT2Attention"
+        }
+    },
+    {
+        "transformer.h.11.attn.c_attn": {
+            "name": "transformer.h.11.attn.c_attn",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.11.attn.c_proj": {
+            "name": "transformer.h.11.attn.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.11.attn.attn_dropout": {
+            "name": "transformer.h.11.attn.attn_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.11.attn.resid_dropout": {
+            "name": "transformer.h.11.attn.resid_dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.h.11.ln_2": {
+            "name": "transformer.h.11.ln_2",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "transformer.h.11.mlp": {
+            "name": "transformer.h.11.mlp",
+            "type": "GPT2MLP"
+        }
+    },
+    {
+        "transformer.h.11.mlp.c_fc": {
+            "name": "transformer.h.11.mlp.c_fc",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.11.mlp.c_proj": {
+            "name": "transformer.h.11.mlp.c_proj",
+            "type": "Conv1D"
+        }
+    },
+    {
+        "transformer.h.11.mlp.act": {
+            "name": "transformer.h.11.mlp.act",
+            "type": "NewGELUActivation"
+        }
+    },
+    {
+        "transformer.h.11.mlp.dropout": {
+            "name": "transformer.h.11.mlp.dropout",
+            "type": "Dropout"
+        }
+    },
+    {
+        "transformer.ln_f": {
+            "name": "transformer.ln_f",
+            "type": "LayerNorm"
+        }
+    },
+    {
+        "lm_head": {
+            "name": "lm_head",
+            "type": "Linear"
+        }
+    }
+]

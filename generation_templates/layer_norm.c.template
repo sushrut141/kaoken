@@ -1,0 +1,83 @@
+// Carries output layer normalization for the supplied inputs.
+// #define WEIGHT_TABLE = {0.1, 0.2,0.3...0.7}
+// #define BIAS_TABLE = {0.2, 0.5, ....0.4}
+
+// UNROLL_START codegen template
+// UNROLL_START start=0,end={SIZE} param1=arr + idx,param2=x + idx - 1
+// param1,param2 will be string replaced with the provided experssion
+// in the UNROLL_START / END block
+// The experssion will be repeated {SIZE} times.
+// idx is compile time known constant
+
+
+// START_METHODS
+#include <arm_neon.h>
+#include <math.h>
+#include <stdio.h>
+
+const float WEIGHT_TABLE[{SIZE}]={WEIGHTS};
+const float BIAS_TABLE[{SIZE}]={BIAS};
+
+
+inline void {NAME}_layer_normalize(float32_t* input, float32_t* output) {
+    // calculate mean
+    float32x4_t sum_vec = vld1q_f32(input);
+    // UNROLL_START start=1,end=({SIZE}/4) param1=input+(4*idx)
+    sum_vec = vaddq_f32(sum_vec, vld1q_f32(param1));
+    // UNROLL_END
+    float32_t sum = vaddvq_f32(sum_vec);
+    float32x4_t vec_mean = vdupq_n_f32(sum / {SIZE});
+
+    // calculate standard deviation
+    // substract mean from values in input
+    // UNROLL_START start=0,end=({SIZE}/4) param1=input+(4*idx),param2=output+(4*idx)
+    vst1q_f32(param2, vsubq_f32(vld1q_f32(param1), vec_mean));
+    // UNROLL_END
+
+    // square the values
+    float32x4_t vec = vld1q_f32(output);
+    // UNROLL_START start=0,end=({SIZE}/4) param1=output+(4*idx)
+    vec = vld1q_f32(param1);
+    vec = vmulq_f32(vec, vec);
+    vst1q_f32(param1, vec);
+    // UNROLL_END
+
+    // add the squared values
+    float32x4_t sum_vec2 = vdupq_n_f32(0.0f);
+    // UNROLL_START start=0,end=({SIZE}/4) param1=output+(4*idx)
+    sum_vec2 = vaddq_f32(sum_vec2, vld1q_f32(param1));
+    // UNROLL_END
+    float32_t sum_of_squares = vaddvq_f32(sum_vec2);
+    float32_t std_deviation = sqrt(sum_of_squares / {SIZE});
+    float32x4_t vec_std_deviation = vdupq_n_f32(std_deviation);
+
+    float32x4_t temp;
+
+    // y = (input - mean) / std_deviation
+    // UNROLL_START start=0,end=({SIZE}/4) param1=input+(4*idx),param2=output+(4*idx)
+    temp = vsubq_f32(vld1q_f32(param1), vec_mean);
+    temp = vdivq_f32(temp, vec_std_deviation);
+    vst1q_f32(param2, temp);
+    // UNROLL_END
+
+    // output = (gamma * y) + beta
+    // UNROLL_START start=0,end=({SIZE}/4) param1=output+(4*idx),param2=WEIGHT_TABLE+(4*idx),param3=BIAS_TABLE+(4*idx)
+    temp = vmulq_f32(vld1q_f32(param1), vld1q_f32(param2));
+    temp = vaddq_f32(temp, vld1q_f32(param3));
+    vst1q_f32(param1, temp);
+    // UNROLL_END
+}
+
+int call_layer_norm(int argc, char** argv) {
+    float input[8] = {0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4};
+    float output[8];
+
+    gpt2_layer_norm_1_layer_normalize(input, output);
+
+    for (int i = 0; i < 8; i += 1) {
+        printf("%f\n", output[i]);
+    }
+
+    return 0;
+}
+// END_METHODS

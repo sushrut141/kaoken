@@ -1,0 +1,52 @@
+// The embedding table is defined as macro where each row of the table is a different macro.
+// Example
+// #define {NAME}_EMEDDING_0 = {0.1, 0.4, 0.6, ...0.8}
+// #define {NAME}_EMEDDING_1 = {0.1, 0.4, 0.6, ...0.8}
+// #define {NAME}_EMEDDING_2 = {0.1, 0.4, 0.6, ...0.8}
+// ...
+// #define EMBEDDING_TABLE = {{NAME}_EMEDDING_IDX_0, {NAME}_EMEDDING_IDX_1, {NAME}_EMEDDING_IDX_2}
+
+
+
+// START_METHODS
+#include <arm_neon.h>
+#include <string.h>
+#include <stdlib.h>
+
+// Initialize heap memory for embedding table.
+static float32_t** {NAME}_EMBEDDING_TABLE = NULL;
+
+/**
+ * Initializes the value in the embedding matrix.
+ * Must be called before calling {NAME}_embedding_get.
+ */
+void {NAME}_initialize_embedding() {
+    {NAME}_EMBEDDING_TABLE = (float32_t**)malloc(sizeof(float32_t*) * {VOCAB_SIZE});
+
+    // Initialize nested array memory to store embeddings.
+    // UNROLL_START start=0,end=({VOCAB_SIZE}) param1=idx
+    {NAME}_EMBEDDING_TABLE[param1] = (float32_t*)malloc(sizeof(float32_t) * {EMBEDDING_SIZE});
+    // UNROLL_END
+
+    // Copy embedding values in to allocated memory
+
+    float32_t temp[{EMBEDDING_SIZE}];
+    // UNROLL_START start=0,end=({VOCAB_SIZE}) param1=idx
+    float32_t temp_param1[{EMBEDDING_SIZE}] = {EMBEDDING_param1};
+    memcpy({NAME}_EMBEDDING_TABLE[param1], temp_param1, sizeof(float32_t) * {EMBEDDING_SIZE});
+    // UNROLL_END
+}
+
+/**
+ * Returns the vector representation of a token by looking up the embedding table.
+ * The embedding table is baked into the source.
+ * {NAME}__initialize_embedding must be called once before this method is invoked.
+ * 
+ * It is expected that the caller knows the exact number of tokens in a context window
+ * and generates source code with repeated calls to this method to avoid iterating over
+ * the list of tokens.
+ */
+inline float* {NAME}_embedding_get(int idx) {
+    return {NAME}_EMBEDDING_TABLE[idx];
+}
+// END_METHODS

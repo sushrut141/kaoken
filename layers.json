@@ -1,0 +1,940 @@
+[
+    {
+        "name": "transformer.wte.weight",
+        "dimensions": [
+            50257,
+            768
+        ]
+    },
+    {
+        "name": "transformer.wpe.weight",
+        "dimensions": [
+            1024,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.0.ln_1.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.0.ln_1.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.0.attn.c_attn.weight",
+        "dimensions": [
+            768,
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.0.attn.c_attn.bias",
+        "dimensions": [
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.0.attn.c_proj.weight",
+        "dimensions": [
+            768,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.0.attn.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.0.ln_2.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.0.ln_2.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.0.mlp.c_fc.weight",
+        "dimensions": [
+            768,
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.0.mlp.c_fc.bias",
+        "dimensions": [
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.0.mlp.c_proj.weight",
+        "dimensions": [
+            3072,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.0.mlp.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.1.ln_1.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.1.ln_1.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.1.attn.c_attn.weight",
+        "dimensions": [
+            768,
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.1.attn.c_attn.bias",
+        "dimensions": [
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.1.attn.c_proj.weight",
+        "dimensions": [
+            768,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.1.attn.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.1.ln_2.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.1.ln_2.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.1.mlp.c_fc.weight",
+        "dimensions": [
+            768,
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.1.mlp.c_fc.bias",
+        "dimensions": [
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.1.mlp.c_proj.weight",
+        "dimensions": [
+            3072,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.1.mlp.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.2.ln_1.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.2.ln_1.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.2.attn.c_attn.weight",
+        "dimensions": [
+            768,
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.2.attn.c_attn.bias",
+        "dimensions": [
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.2.attn.c_proj.weight",
+        "dimensions": [
+            768,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.2.attn.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.2.ln_2.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.2.ln_2.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.2.mlp.c_fc.weight",
+        "dimensions": [
+            768,
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.2.mlp.c_fc.bias",
+        "dimensions": [
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.2.mlp.c_proj.weight",
+        "dimensions": [
+            3072,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.2.mlp.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.3.ln_1.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.3.ln_1.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.3.attn.c_attn.weight",
+        "dimensions": [
+            768,
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.3.attn.c_attn.bias",
+        "dimensions": [
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.3.attn.c_proj.weight",
+        "dimensions": [
+            768,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.3.attn.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.3.ln_2.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.3.ln_2.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.3.mlp.c_fc.weight",
+        "dimensions": [
+            768,
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.3.mlp.c_fc.bias",
+        "dimensions": [
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.3.mlp.c_proj.weight",
+        "dimensions": [
+            3072,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.3.mlp.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.4.ln_1.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.4.ln_1.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.4.attn.c_attn.weight",
+        "dimensions": [
+            768,
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.4.attn.c_attn.bias",
+        "dimensions": [
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.4.attn.c_proj.weight",
+        "dimensions": [
+            768,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.4.attn.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.4.ln_2.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.4.ln_2.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.4.mlp.c_fc.weight",
+        "dimensions": [
+            768,
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.4.mlp.c_fc.bias",
+        "dimensions": [
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.4.mlp.c_proj.weight",
+        "dimensions": [
+            3072,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.4.mlp.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.5.ln_1.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.5.ln_1.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.5.attn.c_attn.weight",
+        "dimensions": [
+            768,
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.5.attn.c_attn.bias",
+        "dimensions": [
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.5.attn.c_proj.weight",
+        "dimensions": [
+            768,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.5.attn.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.5.ln_2.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.5.ln_2.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.5.mlp.c_fc.weight",
+        "dimensions": [
+            768,
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.5.mlp.c_fc.bias",
+        "dimensions": [
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.5.mlp.c_proj.weight",
+        "dimensions": [
+            3072,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.5.mlp.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.6.ln_1.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.6.ln_1.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.6.attn.c_attn.weight",
+        "dimensions": [
+            768,
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.6.attn.c_attn.bias",
+        "dimensions": [
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.6.attn.c_proj.weight",
+        "dimensions": [
+            768,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.6.attn.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.6.ln_2.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.6.ln_2.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.6.mlp.c_fc.weight",
+        "dimensions": [
+            768,
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.6.mlp.c_fc.bias",
+        "dimensions": [
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.6.mlp.c_proj.weight",
+        "dimensions": [
+            3072,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.6.mlp.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.7.ln_1.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.7.ln_1.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.7.attn.c_attn.weight",
+        "dimensions": [
+            768,
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.7.attn.c_attn.bias",
+        "dimensions": [
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.7.attn.c_proj.weight",
+        "dimensions": [
+            768,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.7.attn.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.7.ln_2.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.7.ln_2.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.7.mlp.c_fc.weight",
+        "dimensions": [
+            768,
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.7.mlp.c_fc.bias",
+        "dimensions": [
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.7.mlp.c_proj.weight",
+        "dimensions": [
+            3072,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.7.mlp.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.8.ln_1.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.8.ln_1.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.8.attn.c_attn.weight",
+        "dimensions": [
+            768,
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.8.attn.c_attn.bias",
+        "dimensions": [
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.8.attn.c_proj.weight",
+        "dimensions": [
+            768,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.8.attn.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.8.ln_2.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.8.ln_2.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.8.mlp.c_fc.weight",
+        "dimensions": [
+            768,
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.8.mlp.c_fc.bias",
+        "dimensions": [
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.8.mlp.c_proj.weight",
+        "dimensions": [
+            3072,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.8.mlp.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.9.ln_1.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.9.ln_1.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.9.attn.c_attn.weight",
+        "dimensions": [
+            768,
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.9.attn.c_attn.bias",
+        "dimensions": [
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.9.attn.c_proj.weight",
+        "dimensions": [
+            768,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.9.attn.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.9.ln_2.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.9.ln_2.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.9.mlp.c_fc.weight",
+        "dimensions": [
+            768,
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.9.mlp.c_fc.bias",
+        "dimensions": [
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.9.mlp.c_proj.weight",
+        "dimensions": [
+            3072,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.9.mlp.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.10.ln_1.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.10.ln_1.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.10.attn.c_attn.weight",
+        "dimensions": [
+            768,
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.10.attn.c_attn.bias",
+        "dimensions": [
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.10.attn.c_proj.weight",
+        "dimensions": [
+            768,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.10.attn.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.10.ln_2.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.10.ln_2.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.10.mlp.c_fc.weight",
+        "dimensions": [
+            768,
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.10.mlp.c_fc.bias",
+        "dimensions": [
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.10.mlp.c_proj.weight",
+        "dimensions": [
+            3072,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.10.mlp.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.11.ln_1.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.11.ln_1.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.11.attn.c_attn.weight",
+        "dimensions": [
+            768,
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.11.attn.c_attn.bias",
+        "dimensions": [
+            2304
+        ]
+    },
+    {
+        "name": "transformer.h.11.attn.c_proj.weight",
+        "dimensions": [
+            768,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.11.attn.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.11.ln_2.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.11.ln_2.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.11.mlp.c_fc.weight",
+        "dimensions": [
+            768,
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.11.mlp.c_fc.bias",
+        "dimensions": [
+            3072
+        ]
+    },
+    {
+        "name": "transformer.h.11.mlp.c_proj.weight",
+        "dimensions": [
+            3072,
+            768
+        ]
+    },
+    {
+        "name": "transformer.h.11.mlp.c_proj.bias",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.ln_f.weight",
+        "dimensions": [
+            768
+        ]
+    },
+    {
+        "name": "transformer.ln_f.bias",
+        "dimensions": [
+            768
+        ]
+    }
+]
