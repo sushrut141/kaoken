@@ -2,6 +2,22 @@ import json
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
+ATTENTION_INPUT_EMBEDDING = [0.1 for _ in range(768)]
+ATTENTION_INPUT_SEQUENCE = [ATTENTION_INPUT_EMBEDDING for _ in range(4)]
+
+def compute_attention_output(name, module):
+    if name == 'transformer.h.0.attn':
+        # [1, 4, 768] -> b, s, w
+        with_batch_dimension = [ATTENTION_INPUT_SEQUENCE]
+        input = torch.tensor(with_batch_dimension)
+        output, _ = module.forward(input)
+        output = output.tolist()[0]
+        temp = {}
+        temp['input'] = ATTENTION_INPUT_SEQUENCE
+        temp['output'] = output
+        temp = json.dumps(temp, indent=4)
+        with open('./attention_0.json', 'w+') as f:
+            f.write(temp)
 
 def create_layer_config(model):
     """
@@ -16,6 +32,7 @@ def create_layer_config(model):
     layer_config = []
     module_config = []
     for name, module in model.named_modules():
+        compute_attention_output(name, module)
         temp = {}
         if name:
             temp[name] = {

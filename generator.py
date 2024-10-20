@@ -1,8 +1,13 @@
 from typing import List
 
 import re
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
 OUTPUT_DIR = "./generated"
+
+ATTENTION_INPUT_EMBEDDING = [0.1 for _ in range(768)]
+ATTENTION_INPUT_SEQUENCE = [ATTENTION_INPUT_EMBEDDING for _ in range(4)]
 
 def generate_layer_normalization(
         name: str, weights: List[float], bias: List[float], size: int):
@@ -165,20 +170,98 @@ def generate_embedding(
         with open(output_file_path, 'w+') as of:
             of.write(source)
 
+def replace_tokens(bag_of_tokens, line):
+    regexes = [
+        (r"{c_attn_weight}\[(\d+)\]\[(\d+)\]", "{c_attn_weight}"),
+        (r"{c_proj_weight}\[(\d+)\]\[(\d+)\]", "{c_proj_weight}"),
+        (r"{c_attn_bias}\[(\d+)\]", "{c_attn_bias}"),
+        (r"{c_proj_bias}\[(\d+)\]", "{c_proj_bias}")
+    ]
+    temp = line
+    for tup in regexes:
+        regex, token = tup
+        match = re.search(regex, temp)
+        if match:
+            is_two_dimensional = len(match.groups()) == 2
+            first_index = match.group(1)
+            if is_two_dimensional:
+                second_index = match.group(2)
+                key = f"{token}[{first_index}][{second_index}]"
+            else:
+                key = f"{token}[{first_index}]"
+            temp = temp.replace(key, bag_of_tokens[key])
+    return temp
+
+
+# Generates source for multiplying matrices supplied in the macro
+# // MAT_MULTIPLY a=input,b={C_ATTN_WEIGHTS},c=output r=4,c=5,inner=6
+def generate_mat_multiply_source(input: str, bag_of_tokens) -> str:
+    temp = input.strip().split(' ')
+    assert len(temp) == 4
+    assert temp[1] == 'MAT_MULTIPLY'
+
+    params = {}
+    for i, tup in enumerate(temp[2].split(',')):
+        key, val = tup.split('=')
+        params[key.strip()] = val.strip()
+    assert len(params) == 3, " Format must be a=left_matrix,b=right_matrix,c=output_matrix"
+    assert 'a' in params, " Format must be a=left_matrix,b=right_matrix,c=output_matrix"
+    assert 'b' in params, " Format must be a=left_matrix,b=right_matrix,c=output_matrix"
+    assert 'c' in params, " Format must be a=left_matrix,b=right_matrix,c=output_matrix"
+    
+    ranges = {}
+    for i, tup in enumerate(temp[3].split(',')):
+        key, val = tup.split('=')
+        ranges[key.strip()] = int(val.strip())
+    assert len(params) == 3, " Format must be r=4,c=5,inner=6"
+    assert 'r' in ranges, " Format must be r=4,c=5,inner=6"
+    assert 'c' in ranges, " Format must be r=4,c=5,inner=6"
+    assert 'inner' in ranges, " Format must be r=4,c=5,inner=6"
+
+    source = ''
+    for i in range(ranges['r']):
+        for j in range(ranges['c']):
+            source += f"{params['c']}[{i}][{j}] = "
+            inner = []
+            for k in range(ranges['inner']):
+                line = f"({params['a']}[{i}][{k}] * {params['b']}[{k}][{j}])"
+                line = replace_tokens(bag_of_tokens, line)
+                inner.append(line)
+            source += ' + '.join(inner) + ';' + '\n'
+    return source
+
+def populate_2d_weights_in_bag(bag, weights, token):
+    for i in range(len(weights)):
+        for j in range(len(weights[0])):
+            key = f"{token}[{i}][{j}]"
+            bag[key] = str(weights[i][j])
+
+def populate_1d_weights_in_bag(bag, weights, token):
+    for i in range(len(weights)):
+        key = f"{token}[{i}]"
+        bag[key] = str(weights[i])
+
 def generate_attention(
         name: str,
-        c_attn_weights: List[List[float]],
+        c_attn_weight: List[List[float]],
         c_attn_bias: List[float],
-        c_proj_weights: List[List[float]],
+        c_proj_weight: List[List[float]],
         c_proj_bias: List[float],
         num_heads: int,
         sequence_length: int,
         embedding_size: int):
-    assert len(c_attn_weights) > 0
-    assert len(c_attn_weights[0]) == 3 * embedding_size
+    assert len(c_attn_weight) > 0
+    assert len(c_attn_weight[0]) == 3 * embedding_size
 
     output_file_path = f"{OUTPUT_DIR}/{name}_attention.c"
     template_path = "./generation_templates/attention.c.template"
+
+    # Populate bag of tokens for inlining weights
+    bag_of_tokens = {}
+    populate_2d_weights_in_bag(bag_of_tokens, c_attn_weight, '{c_attn_weight}')
+    populate_2d_weights_in_bag(bag_of_tokens, c_proj_weight, '{c_proj_weight}')
+    populate_1d_weights_in_bag(bag_of_tokens, c_attn_bias, '{c_attn_bias}')
+    populate_1d_weights_in_bag(bag_of_tokens, c_proj_bias, '{c_proj_bias}')
 
     with open(template_path) as template:
         template_text = template.read()
@@ -189,9 +272,9 @@ def generate_attention(
         implementation = implementation.replace("{EMBEDDING_SIZE}", str(embedding_size))
         implementation = implementation.replace("{NUM_HEADS}", str(num_heads))
         implementation = implementation.replace("{SEQUENCE_LENGTH}", str(sequence_length))
-        implementation = implementation.replace("{C_ATTN_EMBEDDING_SIZE_ROW}", str(len(c_attn_weights)))
+        implementation = implementation.replace("{C_ATTN_EMBEDDING_SIZE_ROW}", str(len(c_attn_weight)))
         implementation = implementation.replace("{C_ATTN_EMBEDDING_SIZE_COL}", str(len(c_attn_bias)))
-        implementation = implementation.replace("{C_PROJ_EMBEDDING_SIZE_ROW}", str(len(c_proj_weights)))
+        implementation = implementation.replace("{C_PROJ_EMBEDDING_SIZE_ROW}", str(len(c_proj_weight)))
         implementation = implementation.replace("{C_PROJ_EMBEDDING_SIZE_COL}", str(len(c_proj_bias)))
 
         lines = implementation.split("\n")
@@ -202,6 +285,7 @@ def generate_attention(
         # TODO - reuse generation logic across layers
         while i < size:
             line = lines[i]
+            print("processing line ", line)
 
             if "UNROLL_START" in line:
                 unroll_end = None
@@ -240,6 +324,7 @@ def generate_attention(
                         value = params_map[key]
                         value = value.replace("idx", str(j))
                         unroll_block = unroll_block.replace(key, value)
+                        unroll_block = replace_tokens(bag_of_tokens, unroll_block)
                     source += unroll_block
                     source += '\n'
                 i = unroll_end + 1
@@ -248,20 +333,40 @@ def generate_attention(
                 source += '\n'
                 i += 1
         
-        # replace all the embedding variables with actual values
-        for idx, embedding in enumerate(c_attn_weights):
-            placeholder = "{C_ATTN_EMBEDDING_" + str(idx) + "}"
-            embedding_str = '{' + ', '.join(map(str, embedding)) + '}'
-            source = source.replace(placeholder, embedding_str)
-        for idx, embedding in enumerate(c_proj_weights):
-            placeholder = "{C_PROJ_EMBEDDING_" + str(idx) + "}"
-            embedding_str = '{' + ', '.join(map(str, embedding)) + '}'
-            source = source.replace(placeholder, embedding_str)
-        source = source.replace('{C_ATTN_BIAS}', '{' + ', '.join(map(str, c_attn_bias)) + '}')
-        source = source.replace('{C_PROJ_BIAS}', '{' + ', '.join(map(str, c_proj_bias)) + '}')
+        temp = source.split('\n')
+        source = ''
+        for line in temp:
+            print("post processing line ", line)
+            if "MAT_MULTIPLY" in line:
+                source += generate_mat_multiply_source(line, bag_of_tokens)
+            else:
+                source += line + '\n'
 
         with open(output_file_path, 'w+') as of:
             of.write(source)
+
+def generate_attention_source():
+    model = AutoModelForCausalLM.from_pretrained('./gpt2', local_files_only = True)
+    model_top_config = next(model.named_modules())[1]
+    attention_layers = {
+        'transformer.h.0.attn.c_attn.weight': 'c_attn_weight',
+        'transformer.h.0.attn.c_attn.bias': 'c_attn_bias',
+        'transformer.h.0.attn.c_proj.weight': 'c_proj_weight',
+        'transformer.h.0.attn.c_proj.bias': 'c_proj_bias'
+    }
+    obj = {}
+    for param_name, param in model_top_config.named_parameters():
+        if param_name in attention_layers:
+            key = attention_layers[param_name]
+            obj[key] = param.tolist()
+    
+    generate_attention(
+        name="gpt2_attention_0",
+        **obj,
+        num_heads=12,
+        sequence_length=4,
+        embedding_size=768
+    )
 
 if __name__ == "__main__":
     # generate_layer_normalization(
@@ -281,24 +386,24 @@ if __name__ == "__main__":
     #     vocab_size=4,
     #     embedding_size=4
     # )
-    generate_attention(
-        name="gpt2_attention_0",
-        c_attn_weights = [
-            [0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4]
-        ],
-        c_attn_bias = [0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4],
-        c_proj_weights = [
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4]
-        ],
-        c_proj_bias = [0.1, 0.2, 0.3, 0.4],
-        num_heads=12,
-        sequence_length=4,
-        embedding_size=4
-    )
-
+    # generate_attention(
+    #     name="gpt2_attention_0",
+    #     c_attn_weight = [
+    #         [0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4],
+    #         [0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4],
+    #         [0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4],
+    #         [0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4]
+    #     ],
+    #     c_attn_bias = [0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4],
+    #     c_proj_weight = [
+    #         [0.1, 0.2, 0.3, 0.4],
+    #         [0.1, 0.2, 0.3, 0.4],
+    #         [0.1, 0.2, 0.3, 0.4],
+    #         [0.1, 0.2, 0.3, 0.4]
+    #     ],
+    #     c_proj_bias = [0.1, 0.2, 0.3, 0.4],
+    #     num_heads=12,
+    #     sequence_length=4,
+    #     embedding_size=4=768
+    # )
+    generate_attention_source()

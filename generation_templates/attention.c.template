@@ -61,6 +61,7 @@
 
 // START_METHODS
 #include <arm_neon.h>
+#include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -68,27 +69,27 @@
 
 // Conv1D c_attn
 // Matrix with shape [{C_ATTN_EMBEDDING_SIZE_ROW}, {C_ATTN_EMBEDDING_SIZE_COL}]
-static float32_t** {NAME}_c_attn_weights = NULL;
+float32_t** {NAME}_c_attn_weights = NULL;
 // Vector of size {C_ATTN_EMBEDDING_SIZE_COL}
-static float32_t* {NAME}_c_attn_bias = NULL;
+float32_t* {NAME}_c_attn_bias = NULL;
 
 // Conv1D c_proj
 // Matrix with shape [{C_PROJ_EMBEDDING_SIZE_ROW}, {C_PROJ_EMBEDDING_SIZE_COL}]
-static float32_t** {NAME}_c_proj_weights = NULL;
+float32_t** {NAME}_c_proj_weights = NULL;
 // Vector of size {C_PROJ_EMBEDDING_SIZE_COL}
-static float32_t* {NAME}_c_proj_bias = NULL;
+float32_t* {NAME}_c_proj_bias = NULL;
 
 
 
 // Matrix of size [{SEQUENCE_LENGTH}, {C_ATTN_EMBEDDING_SIZE_COL}]
 // used for storing intermediate values in c_attn conv1d step
-static float32_t** {NAME}_c_attn_temp = NULL;
+float32_t** {NAME}_c_attn_temp = NULL;
 // Matrix of size [{SEQUENCE_LENGTH}, {C_PROJ_EMBEDDING_SIZE_COL}]
 // used for storing intermediate values in multi-head attention
-static float32_t** {NAME}_multi_head_temp = NULL;
+float32_t** {NAME}_multi_head_temp = NULL;
 // Matrix to store mask used in multi head attention  of size 
 // [{SEQUENCE_LENGTH}, {SEQUENCE_LENGTH}]
-static float32_t** {NAME}_multi_head_attention_mask = NULL;
+float32_t** {NAME}_multi_head_attention_mask = NULL;
 
 // TODO - precompute and make this const;
 int64_t C_ATTN_OUTPUT_Q_OFFSET = 0;
@@ -109,38 +110,6 @@ void {NAME}_populate_attention_mask() {
 // Initializes the weights used in the attention layer.
 // Must be called before calling {NAME}_attention.
 void {NAME}_initialize_heap_memory() {
-    // TODO - initialize memory and populate weights
-    {NAME}_c_attn_weights = (float32_t**)malloc(sizeof(float32_t*) * {C_ATTN_EMBEDDING_SIZE_ROW});
-    {NAME}_c_attn_bias = (float32_t*)malloc(sizeof(float32_t) * {C_ATTN_EMBEDDING_SIZE_COL});
-    {NAME}_c_proj_weights = (float32_t**)malloc(sizeof(float32_t*) * {C_PROJ_EMBEDDING_SIZE_ROW});
-    {NAME}_c_proj_bias = (float32_t*)malloc(sizeof(float32_t) * {C_PROJ_EMBEDDING_SIZE_COL});
-
-    // Initialize nested array memory to store embeddings.
-    // UNROLL_START start=0,end=({C_ATTN_EMBEDDING_SIZE_ROW}) param1=idx
-    {NAME}_c_attn_weights[param1] = (float32_t*)malloc(sizeof(float32_t) * {C_ATTN_EMBEDDING_SIZE_COL});
-    // UNROLL_END
-
-    // UNROLL_START start=0,end=({C_PROJ_EMBEDDING_SIZE_ROW}) param1=idx
-    {NAME}_c_attn_weights[param1] = (float32_t*)malloc(sizeof(float32_t) * {C_PROJ_EMBEDDING_SIZE_COL});
-    // UNROLL_END
-
-    // Copy embedding values in to allocated memory
-    // UNROLL_START start=0,end=({C_ATTN_EMBEDDING_SIZE_ROW}) param1=idx
-    float32_t c_attn_param1[{C_ATTN_EMBEDDING_SIZE_COL}] = {C_ATTN_EMBEDDING_param1};
-    memcpy({NAME}_c_attn_weights[param1], c_attn_param1, sizeof(float32_t) * {C_ATTN_EMBEDDING_SIZE_COL});
-    // UNROLL_END
-
-    // UNROLL_START start=0,end=({C_PROJ_EMBEDDING_SIZE_ROW}) param1=idx
-    float32_t c_proj_param1[{C_PROJ_EMBEDDING_SIZE_COL}] = {C_PROJ_EMBEDDING_param1};
-    memcpy({NAME}_c_proj_weights[param1], c_proj_param1, sizeof(float32_t) * {C_PROJ_EMBEDDING_SIZE_COL});
-    // UNROLL_END
-
-    float32_t c_attn_bias[{C_ATTN_EMBEDDING_SIZE_COL}] = {C_ATTN_BIAS};
-    float32_t c_proj_bias[{C_PROJ_EMBEDDING_SIZE_COL}] = {C_PROJ_BIAS};
-    memcpy({NAME}_c_attn_bias, c_attn_bias, sizeof(float32_t) * {C_ATTN_EMBEDDING_SIZE_COL});
-    memcpy({NAME}_c_proj_bias, c_proj_bias, sizeof(float32_t) * {C_PROJ_EMBEDDING_SIZE_COL});
-
-    // Initialize memory for attention intermediate states
     {NAME}_c_attn_temp = (float32_t**)malloc(sizeof(float32_t*) * {SEQUENCE_LENGTH});
     {NAME}_multi_head_temp = (float32_t**)malloc(sizeof(float32_t*) * {SEQUENCE_LENGTH});
     {NAME}_multi_head_attention_mask = (float32_t**)malloc(sizeof(float32_t*) * {SEQUENCE_LENGTH});
@@ -155,23 +124,17 @@ void {NAME}_initialize_heap_memory() {
     {NAME}_populate_attention_mask();
 }
 
-static inline void {NAME}_c_attn_populate_cell(float32_t** input, float32_t** output, int64_t row_idx, int64_t cell_idx) {
-    float32_t temp = 0.0;
-    // UNROLL_START start=0,end={C_ATTN_EMBEDDING_SIZE_ROW} param1=idx
-    temp += input[row_idx][param1] * {NAME}_c_attn_weights[param1][cell_idx];
-    // UNROLL_END
-    output[row_idx][cell_idx] = temp + {NAME}_c_attn_bias[cell_idx];
-}
-
-static inline void {NAME}_c_attn_populate_row(float32_t** input, float32_t** output, int64_t row_idx) {
+static inline void {NAME}_c_attn_add_bias(float32_t** output, int64_t row_idx) {
     // UNROLL_START start=0,end={C_ATTN_EMBEDDING_SIZE_COL} param1=idx
-    {NAME}_c_attn_populate_cell(input, output, row_idx, param1);
+    output[row_idx][param1] += {c_attn_bias}[param1];
     // UNROLL_END
 }
 
 static inline void {NAME}_apply_c_attn_conv1d(float32_t** input, float32_t** output) {
-    // UNROLL_START start=0,end={SEQUENCE_LENGTH} param1=idx
-    {NAME}_c_attn_populate_row(input, output, param1);
+    // MAT_MULTIPLY a=input,b={c_attn_weight},c=output r={SEQUENCE_LENGTH},c={C_ATTN_EMBEDDING_SIZE_COL},inner={EMBEDDING_SIZE}
+
+    // UNROLL_START start=0,end={C_ATTN_EMBEDDING_SIZE_ROW} param1=idx
+    {NAME}_c_attn_add_bias(output, param1);
     // UNROLL_END
 }
 
@@ -184,7 +147,7 @@ static inline void {NAME}_populate_q_k_cell(float32_t** input, float32_t* output
     // q * k.transpose
     // [s, 64] * [s, 64].t
     // UNROLL_START start=0,end=({EMBEDDING_SIZE}/{NUM_HEADS}) param1=idx
-    temp += (*(q + param1)) * (*(k + param1))
+    temp += (*(q + param1)) * (*(k + param1));
     // UNROLL_END
     output[seq_idx + (seq_idx * {SEQUENCE_LENGTH})] = temp;
 }
@@ -265,23 +228,16 @@ static inline void {NAME}_compute_multihead_attention(float32_t** input, float32
 }
 
 
-static inline void {NAME}_c_proj_populate_cell(float32_t** input, float32_t** output, int64_t row_idx, int cell_idx) {
-    float32_t temp = 0.0;
+static inline void {NAME}_c_proj_add_bias(float32_t** output, int64_t row_idx) {
     // UNROLL_START start=0,end={C_PROJ_EMBEDDING_SIZE_COL} param1=idx
-    temp += input[row_idx][param1] * {NAME}_c_proj_weights[param1][cell_idx];
-    // UNROLL_END
-    output[row_idx][cell_idx] = temp + {NAME}_c_proj_bias[cell_idx];
-}
-
-static inline void {NAME}_c_proj_populate_row(float32_t** input, float32_t** output, int64_t row_idx) {
-    // UNROLL_START start=0,end={C_PROJ_EMBEDDING_SIZE_COL} param1=idx
-    {NAME}_c_proj_populate_cell(input, output, row_idx, param1);
+    output[row_idx][param1] += {c_proj_bias}[param1];
     // UNROLL_END
 }
-
 static void {NAME}_apply_c_proj_conv1d(float32_t** input, float32_t** output) {
+    // MAT_MULTIPLY a=input,b={c_proj_weight},c=output r={SEQUENCE_LENGTH},c={EMBEDDING_SIZE},inner={EMBEDDING_SIZE}
+
     // UNROLL_START start=0,end={SEQUENCE_LENGTH} param1=idx
-    {NAME}_c_proj_populate_row(input, output, param1);
+    {NAME}_c_proj_add_bias(output, param1);
     // UNROLL_END
 }
 
@@ -314,20 +270,26 @@ void {NAME}_attention(float32_t** input, float32_t** output) {
     {NAME}_apply_c_proj_conv1d({NAME}_multi_head_temp, output);
 }
 
-void call_attention(int argc, char** argv) {
+int main(int argc, char** argv) {
     float32_t** input = (float32_t**)malloc(sizeof(float32_t*) * {SEQUENCE_LENGTH});
     float32_t** output = (float32_t**)malloc(sizeof(float32_t*) * {SEQUENCE_LENGTH});
     
     // UNROLL_START start=0,end={SEQUENCE_LENGTH} param1=idx
     input[param1] = (float32_t*)malloc(sizeof(float32_t) * {EMBEDDING_SIZE});
     output[param1] = (float32_t*)malloc(sizeof(float32_t) * {EMBEDDING_SIZE});
-    memset(input[param1], 1.0, {EMBEDDING_SIZE});
-    memset(output[param1], 1.0, {EMBEDDING_SIZE});
+    memset(input[param1], 0.1, sizeof(float32_t) * {EMBEDDING_SIZE});
+    memset(output[param1], 0.0, sizeof(float32_t) * {EMBEDDING_SIZE});
     // UNROLL_END
+
+    {NAME}_initialize_heap_memory();
 
     {NAME}_attention(input, output);
 
-    return;
+    for (int i = 0; i < {EMBEDDING_SIZE}; i += 1) {
+        printf("Value for sequence 0 at %d : %f", i,  output[0][i]);
+    }
+
+    return 0;
 }
 
 // END_METHODS
