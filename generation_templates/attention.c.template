@@ -149,7 +149,7 @@ static inline void {NAME}_populate_q_k_cell(float32_t** input, float32_t* output
     // UNROLL_START start=0,end=({EMBEDDING_SIZE}/{NUM_HEADS}) param1=idx
     temp += (*(q + param1)) * (*(k + param1));
     // UNROLL_END
-    output[seq_idx + (seq_idx * {SEQUENCE_LENGTH})] = temp;
+    output[cell_idx + (seq_idx * {SEQUENCE_LENGTH})] = temp;
 }
 
 static inline void {NAME}_populate_q_k_sequence(float32_t** input, float32_t* output, int16_t head_idx, int16_t seq_idx) {

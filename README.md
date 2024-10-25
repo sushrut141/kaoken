@@ -3,7 +3,7 @@
 
 ## GTP2 architecture and layer shapes
 
-The sequence of cimpuations carried out and the input / output shapes of tensors at each
+The sequence of compuations carried out and the input / output shapes of tensors at each
 stage can be viewed [here](https://amaarora.github.io/posts/2020-02-18-annotatedGPT2.html).
 
 ## Reference for Neon Vector operations
