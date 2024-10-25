@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Mapping
 
 import os
 import re
@@ -70,6 +70,36 @@ def generate_mat_multiply_source(input: str, bag_of_tokens) -> str:
             source += ' + '.join(inner) + ';' + '\n'
     return source
 
+def generate_mat_row_add_vec1D(line: str, bag_of_tokens: Mapping[str, str]) -> str:
+    temp = line.strip().split(' ')
+    assert len(temp) == 4
+    assert temp[1] == 'MAT_ROW_ADD_VEC1D'
+
+    params = {}
+    for _, tup in enumerate(temp[2].split(',')):
+        key, val = tup.split('=')
+        params[key.strip()] = val.strip()
+    assert len(params) == 2, " Format must be a=matrix,b=vector"
+    assert 'a' in params, " Format must be a=matrix,b=vector"
+    assert 'b' in params, " Format must be a=matrix,b=vector"
+
+    ranges = {}
+    for _, tup in enumerate(temp[3].split(',')):
+        key, val = tup.split('=')
+        ranges[key.strip()] = int(val.strip())
+    assert len(params) == 2, " Format must be r=4,c=5"
+    assert 'r' in ranges, " Format must be r=4,c=5"
+    assert 'c' in ranges, " Format must be r=4,c=5"
+
+    source = ''
+    for i in range(ranges['r']):
+        for j in range(ranges['c']):
+            line = f"{params['a']}[{i}][{j}] += {params['b']}[{j}];\n"
+            line = replace_tokens(bag_of_tokens, line)
+            source += line
+    return source
+
+
 def populate_2d_weights_in_bag(bag, weights, token):
     for i in range(len(weights)):
         for j in range(len(weights[0])):
@@ -80,6 +110,7 @@ def populate_1d_weights_in_bag(bag, weights, token):
     for i in range(len(weights)):
         key = f"{token}[{i}]"
         bag[key] = str(weights[i])
+
 
 def generate_attention(
         name: str,
@@ -179,6 +210,8 @@ def generate_attention(
             print("post processing line ", line)
             if "MAT_MULTIPLY" in line:
                 source += generate_mat_multiply_source(line, bag_of_tokens)
+            elif "MAT_ROW_ADD_VEC1D" in line:
+                source += generate_mat_row_add_vec1D(line, bag_of_tokens)
             else:
                 source += line + '\n'
 

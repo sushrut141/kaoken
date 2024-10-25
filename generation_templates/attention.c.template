@@ -124,18 +124,10 @@ void {NAME}_initialize_heap_memory() {
     {NAME}_populate_attention_mask();
 }
 
-static inline void {NAME}_c_attn_add_bias(float32_t** output, int64_t row_idx) {
-    // UNROLL_START start=0,end={C_ATTN_EMBEDDING_SIZE_COL} param1=idx
-    output[row_idx][param1] += {c_attn_bias}[param1];
-    // UNROLL_END
-}
-
 static inline void {NAME}_apply_c_attn_conv1d(float32_t** input, float32_t** output) {
     // MAT_MULTIPLY a=input,b={c_attn_weight},c=output r={SEQUENCE_LENGTH},c={C_ATTN_EMBEDDING_SIZE_COL},inner={EMBEDDING_SIZE}
 
-    // UNROLL_START start=0,end={C_ATTN_EMBEDDING_SIZE_ROW} param1=idx
-    {NAME}_c_attn_add_bias(output, param1);
-    // UNROLL_END
+    // MAT_ROW_ADD_VEC1D a=output,b={c_attn_bias} r={SEQUENCE_LENGTH},c={C_ATTN_EMBEDDING_SIZE_COL}
 }
 
 static inline void {NAME}_populate_q_k_cell(float32_t** input, float32_t* output, 
@@ -228,17 +220,10 @@ static inline void {NAME}_compute_multihead_attention(float32_t** input, float32
 }
 
 
-static inline void {NAME}_c_proj_add_bias(float32_t** output, int64_t row_idx) {
-    // UNROLL_START start=0,end={C_PROJ_EMBEDDING_SIZE_COL} param1=idx
-    output[row_idx][param1] += {c_proj_bias}[param1];
-    // UNROLL_END
-}
 static void {NAME}_apply_c_proj_conv1d(float32_t** input, float32_t** output) {
     // MAT_MULTIPLY a=input,b={c_proj_weight},c=output r={SEQUENCE_LENGTH},c={EMBEDDING_SIZE},inner={EMBEDDING_SIZE}
 
-    // UNROLL_START start=0,end={SEQUENCE_LENGTH} param1=idx
-    {NAME}_c_proj_add_bias(output, param1);
-    // UNROLL_END
+    // MAT_ROW_ADD_VEC1D a=output,b={c_proj_bias} r={SEQUENCE_LENGTH},c={C_PROJ_EMBEDDING_SIZE_COL}
 }
 
 /**
