@@ -120,7 +120,8 @@ def generate_attention(
         c_proj_bias: List[float],
         num_heads: int,
         sequence_length: int,
-        embedding_size: int):
+        embedding_size: int,
+        generate_test_main: bool):
     assert len(c_attn_weight) > 0
     assert len(c_attn_weight[0]) == 3 * embedding_size
 
@@ -214,6 +215,12 @@ def generate_attention(
                 source += generate_mat_row_add_vec1D(line, bag_of_tokens)
             else:
                 source += line + '\n'
+        
+        if not generate_test_main and '// START_TEST' in source:
+            assert '// END_TEST' in source, "Testing block must be closed with // END_TEST"
+            test_start_idx = source.index('// START_TEST')
+            test_end_idx = source.index('// END_TEST')
+            source = source[:test_start_idx] + source[test_end_idx+1:]
 
         with open(output_file_path, 'w+') as of:
             of.write(source)
@@ -239,28 +246,23 @@ def generate_attention_from_gpt2_pretrained():
         **obj,
         num_heads=12,
         sequence_length=4,
-        embedding_size=768
+        embedding_size=768,
+        generate_test_main= False
     )
 
 if __name__ == "__main__":
+    c_attn_weight = torch.ones(4, 12)
+    c_proj_weight = torch.ones(4, 12)
+
     generate_attention(
         name="gpt2_attention_0",
-        c_attn_weight = [
-            [0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4]
-        ],
-        c_attn_bias = [0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4, 0.1, 0.2, 0.3, 0.4],
-        c_proj_weight = [
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4]
-        ],
-        c_proj_bias = [0.1, 0.2, 0.3, 0.4],
-        num_heads=12,
-        sequence_length=4,
-        embedding_size=4
+        c_attn_weight = c_attn_weight.tolist(),
+        c_attn_bias = torch.zeros(12).tolist(),
+        c_proj_weight = c_proj_weight.tolist(),
+        c_proj_bias = torch.zeros(4).tolist(),
+        num_heads=4,
+        sequence_length=1,
+        embedding_size=4,
+        generate_test_main= True
     )
     # generate_attention_from_gpt2_pretrained()

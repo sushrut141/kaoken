@@ -255,26 +255,40 @@ void {NAME}_attention(float32_t** input, float32_t** output) {
     {NAME}_apply_c_proj_conv1d({NAME}_multi_head_temp, output);
 }
 
+// START_TEST
 int main(int argc, char** argv) {
     float32_t** input = (float32_t**)malloc(sizeof(float32_t*) * {SEQUENCE_LENGTH});
     float32_t** output = (float32_t**)malloc(sizeof(float32_t*) * {SEQUENCE_LENGTH});
-    
-    // UNROLL_START start=0,end={SEQUENCE_LENGTH} param1=idx
-    input[param1] = (float32_t*)malloc(sizeof(float32_t) * {EMBEDDING_SIZE});
-    output[param1] = (float32_t*)malloc(sizeof(float32_t) * {EMBEDDING_SIZE});
-    memset(input[param1], 0.1, sizeof(float32_t) * {EMBEDDING_SIZE});
-    memset(output[param1], 0.0, sizeof(float32_t) * {EMBEDDING_SIZE});
-    // UNROLL_END
+
+    for (int i = 0; i < {SEQUENCE_LENGTH}; i += 1) {
+        input[i] = (float32_t*)malloc(sizeof(float32_t) * {EMBEDDING_SIZE});
+        // Set input as [1.0, 2.0, 3.0, 4.0 ... ]
+        for (int j = 0; j < {EMBEDDING_SIZE}; j += 1) {
+            input[i][j] = (j + 1) * 1.0;
+        }
+
+        output[i] = (float32_t*)malloc(sizeof(float32_t) * {EMBEDDING_SIZE});
+        memset(output[i], 0.0, sizeof(float32_t) * {EMBEDDING_SIZE});
+    }
 
     {NAME}_initialize_heap_memory();
 
     {NAME}_attention(input, output);
 
-    for (int i = 0; i < {EMBEDDING_SIZE}; i += 1) {
-        printf("Value for sequence 0 at %d : %f", i,  output[0][i]);
+
+    for (int i = 0; i < {SEQUENCE_LENGTH}; i += 1) {
+        printf("Sequence %d Input\n", i);
+        for (int j = 0; j < {EMBEDDING_SIZE}; j += 1) {
+            printf("idx %d -> %f\n", j,  input[i][j]);
+        }
+
+        printf("Sequence %d Output\n", i);
+        for (int j = 0; j < {EMBEDDING_SIZE}; j += 1) {
+            printf("idx %d -> %f\n", j,  output[i][j]);
+        }
     }
 
     return 0;
 }
-
+// END_TEST
 // END_METHODS

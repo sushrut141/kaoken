@@ -1,6 +1,6 @@
 import json
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import GPT2Tokenizer, GPT2Model
 
 ATTENTION_INPUT_EMBEDDING = [0.1 for _ in range(768)]
 ATTENTION_INPUT_SEQUENCE = [ATTENTION_INPUT_EMBEDDING for _ in range(4)]
@@ -83,19 +83,21 @@ def create_layer_config(model):
 # )>
 
 def main():
-    tokenizer = AutoTokenizer.from_pretrained('./gpt2', local_files_only = True)
-    model = AutoModelForCausalLM.from_pretrained('./gpt2', local_files_only = True)
+    tokenizer = GPT2Tokenizer.from_pretrained('./gpt2', local_files_only = True)
+    model = GPT2Model.from_pretrained('./gpt2', local_files_only = True)
 
     text = "Replace me by any text you'd like Replace me by any text you'd like Replace me by any text you'd like Replace me by any text you'd like Replace me by any text you'd like"
     encoded_input = tokenizer(text, return_tensors='pt')
 
-    output = model.generate(**encoded_input)
+    output = model(**encoded_input)
 
-    output_text = tokenizer.decode(output[0])
+    # output_text = tokenizer.decode(output)
 
-    layer_config = create_layer_config(model)
-    with open('./layers.json', 'w+') as f:
-        f.write(layer_config)
+    print(output)
+
+    # layer_config = create_layer_config(model)
+    # with open('./layers.json', 'w+') as f:
+    #     f.write(layer_config)
 
 if __name__ == "__main__":
     main()
