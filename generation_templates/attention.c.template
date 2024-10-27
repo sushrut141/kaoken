@@ -101,7 +101,7 @@ int64_t C_ATTN_OUTPUT_V_OFFSET = 2 * {C_ATTN_EMBEDDING_SIZE_ROW};
 void {NAME}_populate_attention_mask() {
     for (int i = 0; i < {SEQUENCE_LENGTH}; i += 1) {
         for (int j = 0; j < {SEQUENCE_LENGTH}; j += 1) {
-            float value = (j <= i ? 1.0 : 0.0);
+            float32_t value = (j <= i ? 1.0 : 0.0);
             {NAME}_multi_head_attention_mask[i][j] = value;
         }
     }
@@ -153,16 +153,17 @@ static inline void {NAME}_populate_q_k_sequence(float32_t** input, float32_t* ou
 static inline void {NAME}_softmax_compute(float32_t* input, int16_t seq_idx) {
     // We are assuming that softmax is to be computed for each sequence, 
     // not across sequences in the [s, s] matrix
-    float32_t seq_sum = 0.0;
+    // Use 64 bit floats to avoid overflow when computing exp(x).
+    float64_t seq_sum = 0.0;
     // Compute the sum of exponents for each elemt in sequence that is not masked
     // UNROLL_START start=0,end=({SEQUENCE_LENGTH}) param1=idx
-    seq_sum += exp(input[param1 + (seq_idx * {SEQUENCE_LENGTH})]) * {NAME}_multi_head_attention_mask[seq_idx][param1];
+    seq_sum += expl((float64_t)input[param1 + (seq_idx * {SEQUENCE_LENGTH})]) * {NAME}_multi_head_attention_mask[seq_idx][param1];
     // UNROLL_END
 
     // Divide each unmasked elem by row sum
     // softmax(xi) = exp(xi) / sum([exp(xj) for xj in sequence])
     // UNROLL_START start=0,end=({SEQUENCE_LENGTH}) param1=idx
-    input[param1 + (seq_idx * {SEQUENCE_LENGTH})] = (exp(input[param1 + (seq_idx * {SEQUENCE_LENGTH})]) * {NAME}_multi_head_attention_mask[seq_idx][param1]) / seq_sum;
+    input[param1 + (seq_idx * {SEQUENCE_LENGTH})] = (expl((float64_t)input[param1 + (seq_idx * {SEQUENCE_LENGTH})]) * {NAME}_multi_head_attention_mask[seq_idx][param1]) / seq_sum;
     // UNROLL_END
 }
 

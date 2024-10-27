@@ -26,6 +26,8 @@ class Conv1D(nn.Module):
         x = x.view(*size_out)
         return x
 
+# Source copied from huggingfcae transformers package for running
+# validation tests on smaller weights / inputs.
 class GPT2Attention(nn.Module):
     def __init__(self, config, is_cross_attention=False):
         super().__init__()
