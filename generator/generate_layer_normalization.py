@@ -6,14 +6,14 @@ OUTPUT_DIR = "./generated"
 
 
 def generate_layer_normalization(
-        name: str, weights: List[float], bias: List[float], size: int):
+        name: str, weights: List[float], bias: List[float], size: int, generate_test_main: bool):
     """
     Generates source code for baked layer normalization.
     """
     assert len(weights) == size
     assert len(bias) == size
     output_file_path = f"{OUTPUT_DIR}/{name}_layer_norm.c"
-    template_path = "../generation_templates/layer_norm.c.template"
+    template_path = "./generation_templates/layer_norm.c.template"
 
     with open(template_path) as template:
         template_text = template.read()
@@ -80,13 +80,19 @@ def generate_layer_normalization(
                 source += line
                 source += '\n'
                 i += 1
+        if not generate_test_main and '// START_TEST' in source:
+            assert '// END_TEST' in source, "Testing block must be closed with // END_TEST"
+            test_start_idx = source.index('// START_TEST') - 1
+            test_end_idx = source.index('// END_TEST') + len('// END_TEST')
+            source = source[:test_start_idx] + source[test_end_idx+1:]
         with open(output_file_path, 'w+') as of:
             of.write(source)
 
 if __name__ == "__main__":
     generate_layer_normalization(
         name= "gpt2_layer_norm_1",
-        weights=[0.1, 0.2, 0.3, 0.4],
-        bias=[0.20, 0.12, 0.77, 0.56],
-        size=4
+        weights=[0.1, 0.1, 0.1, 0.1],
+        bias=[0.1, 0.1, 0.1, 0.1],
+        size=4,
+        generate_test_main=True
     )
