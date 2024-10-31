@@ -1,0 +1,36 @@
+// Carries output new GELU activation on the supplie inputs.
+
+// START_METHODS
+#include <arm_neon.h>
+#include <math.h>
+#include <stdio.h>
+
+// 0.5 * input * (1.0 + torch.tanh(math.sqrt(2.0 / math.pi) * (input + 0.044715 * torch.pow(input, 3.0))))
+inline void {NAME}_new_gelu_activation(float32_t* input, float32_t* output) {
+    // UNROLL_START start=0,end={SIZE} param1=idx
+    output[param1] = input[param1] + (0.044715* pow(input[param1], 3));
+    output[param1] *= sqrt(2.0 / 3.14159);
+    output[param1] = 1.0 + tanh(output[param1]);
+    output[param1] = 0.5 * input[param1] * output[param1];
+    // UNROLL_END
+}
+
+// START_TEST
+int main(int argc, char** argv) {
+    float input[{SIZE}];
+    float output[{SIZE}];
+
+    for (int i = 0; i < {SIZE}; i += 1) {
+        input[i] = 0.1 * (i + 1);
+    }
+
+    {NAME}_new_gelu_activation(input, output);
+
+    for (int i = 0; i < {SIZE}; i += 1) {
+        printf("%f\n", output[i]);
+    }
+
+    return 0;
+}
+// END_TEST
+// END_METHODS

@@ -1,6 +1,6 @@
 import json
 import torch
-from transformers import GPT2Tokenizer, GPT2Model
+from transformers import GPT2Tokenizer, GPT2LMHeadModel
 
 ATTENTION_INPUT_EMBEDDING = [0.1 for _ in range(768)]
 ATTENTION_INPUT_SEQUENCE = [ATTENTION_INPUT_EMBEDDING for _ in range(4)]
@@ -84,7 +84,7 @@ def create_layer_config(model):
 
 def main():
     tokenizer = GPT2Tokenizer.from_pretrained('./gpt2', local_files_only = True)
-    model = GPT2Model.from_pretrained('./gpt2', local_files_only = True)
+    model = GPT2LMHeadModel.from_pretrained('./gpt2', local_files_only = True)
 
     text = "Replace me by any text you'd like Replace me by any text you'd like Replace me by any text you'd like Replace me by any text you'd like Replace me by any text you'd like"
     encoded_input = tokenizer(text, return_tensors='pt')
