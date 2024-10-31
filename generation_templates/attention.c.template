@@ -135,13 +135,15 @@ static inline void {NAME}_populate_q_k_cell(float32_t** input, float32_t* output
     float32_t* q = input[seq_idx] + C_ATTN_OUTPUT_Q_OFFSET + (head_idx * ({EMBEDDING_SIZE}/{NUM_HEADS}));
     float32_t* k = input[cell_idx] + C_ATTN_OUTPUT_K_OFFSET + (head_idx * ({EMBEDDING_SIZE}/{NUM_HEADS}));
 
-    float32_t temp = 0.0;
+    float64_t temp = 0.0;
     // q * k.transpose
     // [s, 64] * [s, 64].t
     // UNROLL_START start=0,end=({EMBEDDING_SIZE}/{NUM_HEADS}) param1=idx
     temp += (*(q + param1)) * (*(k + param1));
     // UNROLL_END
-    output[cell_idx + (seq_idx * {SEQUENCE_LENGTH})] = temp;
+    // Scale attention weights
+    temp = temp / pow({EMBEDDING_SIZE}/{NUM_HEADS}, 0.5);
+    output[cell_idx + (seq_idx * {SEQUENCE_LENGTH})] = temp ;
 }
 
 static inline void {NAME}_populate_q_k_sequence(float32_t** input, float32_t* output, int16_t head_idx, int16_t seq_idx) {
@@ -175,13 +177,14 @@ static inline void {NAME}_populate_qk_v_cell(
     int16_t seq_idx,
     int16_t cell_idx
 ) {
+    int64_t offset = (head_idx * {EMBEDDING_SIZE}/{NUM_HEADS});
     float32_t temp = 0.0;
     // UNROLL_START start=0,end=({SEQUENCE_LENGTH}) param1=idx
-    temp += qk[param1 + (seq_idx * {SEQUENCE_LENGTH})] * (*(input[param1] + C_ATTN_OUTPUT_V_OFFSET + param1));
+    temp += qk[param1 + (seq_idx * {SEQUENCE_LENGTH})] * (*(input[param1] + C_ATTN_OUTPUT_V_OFFSET + offset + cell_idx));
     // UNROLL_END
 
     // populate in the output for given sequence and head
-    output[seq_idx][cell_idx + (head_idx * {EMBEDDING_SIZE}/{NUM_HEADS})] = temp;
+    output[seq_idx][cell_idx + offset] = temp;
 }
 
 static inline void {NAME}_populate_qk_v_sequence(
@@ -197,7 +200,7 @@ static inline void {NAME}_populate_qk_v_sequence(
 }
 
 static inline void {NAME}_compute_attention_for_head(float32_t** input, float32_t**  output, int16_t head_idx) {
-    float temp[{SEQUENCE_LENGTH}][{SEQUENCE_LENGTH}];
+    float32_t temp[{SEQUENCE_LENGTH}][{SEQUENCE_LENGTH}];
     // UNROLL_START start=0,end=({SEQUENCE_LENGTH}) param1=idx
     {NAME}_populate_q_k_sequence(input, &temp[0][0], head_idx, param1);
     // UNROLL_END

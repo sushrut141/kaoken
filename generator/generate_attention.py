@@ -250,19 +250,26 @@ def generate_attention_from_gpt2_pretrained():
         generate_test_main= False
     )
 
+def get_conv1d_weights(nx, nf):
+    return [
+        [
+            (i* 0.001) for i in range(nf)
+        ] for _ in range(nx)
+    ]
+
 if __name__ == "__main__":
-    c_attn_weight = torch.ones(4, 12)
-    c_proj_weight = torch.ones(4, 12)
+    c_attn_weight = get_conv1d_weights(8, 24)
+    c_proj_weight = get_conv1d_weights(8, 24)
 
     generate_attention(
         name="gpt2_attention_0",
-        c_attn_weight = c_attn_weight.tolist(),
-        c_attn_bias = torch.zeros(12).tolist(),
-        c_proj_weight = c_proj_weight.tolist(),
+        c_attn_weight = c_attn_weight,
+        c_attn_bias = torch.zeros(24).tolist(),
+        c_proj_weight = c_proj_weight,
         c_proj_bias = torch.zeros(4).tolist(),
-        num_heads=4,
+        num_heads=2,
         sequence_length=1,
-        embedding_size=4,
+        embedding_size=8,
         generate_test_main= True
     )
     # generate_attention_from_gpt2_pretrained()

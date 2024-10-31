@@ -1,6 +1,12 @@
 import torch
 from torch import nn
 
+def get_conv1d_weights(nx, nf):
+    return [
+        [
+            (i* 0.001) for i in range(nf)
+        ] for _ in range(nx)
+    ]
 class Conv1D(nn.Module):
     """
     1D-convolutional layer as defined by Radford et al. for OpenAI GPT (and also used in GPT-2).
@@ -15,8 +21,8 @@ class Conv1D(nn.Module):
     def __init__(self, nf, nx):
         super().__init__()
         self.nf = nf
-        # hard coding weights to 1 for determinitic tests.
-        w = torch.ones(nx, nf)
+        # hard coding weights for deterministic tests.
+        w = torch.tensor(get_conv1d_weights(nx, nf))
         self.weight = nn.Parameter(w)
         self.bias = nn.Parameter(torch.zeros(nf))
 
@@ -150,9 +156,9 @@ class GPT2AttentionConfig:
 
 def create_attention_layer():
     config = GPT2AttentionConfig({
-        'max_position_embeddings': 4,
-        'hidden_size': 4,
-        'num_attention_heads': 4,
+        'max_position_embeddings': 1,
+        'hidden_size': 8,
+        'num_attention_heads': 2,
         'scale_attn_weights': True
     })
     attention = GPT2Attention(config)
@@ -168,7 +174,7 @@ def generate_base_output(attention):
             # Sequence Length 1
             [
                 # Embedding Size 4
-                [1.0, 2.0, 3.0, 4.0]
+                [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]
             ]
         ]
     )
