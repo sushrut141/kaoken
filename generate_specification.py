@@ -1,6 +1,11 @@
 import json
 import torch
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
+import time
+import os
+
+# Dump weights to disk to generate baked source.
+DUMP_WEIGHTS = False
 
 def create_layer_config(model):
     """
@@ -24,8 +29,11 @@ def create_layer_config(model):
                 param_temp['param_name'] = param_name
                 param_temp['dimensions'] = list(param.shape)
                 temp['params'].append(param_temp)
+                if DUMP_WEIGHTS:
+                    with open(f"./weights/{param_name}.json", 'w+') as w:
+                        w.write(json.dumps(param.tolist(), indent=4))
             module_config.append(temp)
-    with open('./modules.json', 'w+') as f:
+    with open('./gpt_specification.json', 'w+') as f:
         f.write(json.dumps(module_config, indent=4))
 
 # Reference for blocks: https://huggingface.co/transformers/v4.11.3/_modules/transformers/models/gpt2/modeling_gpt2.html
@@ -58,17 +66,19 @@ def create_layer_config(model):
 #   (lm_head): Linear(in_features=768, out_features=50257, bias=False)
 # )>
 def main():
+    assert os.path.isdir('./gpt2'), "GPT2 model mustbe cloned locally from Huggingface https://huggingface.co/openai-community/gpt2"
     tokenizer = GPT2Tokenizer.from_pretrained('./gpt2', local_files_only = True)
     model = GPT2LMHeadModel.from_pretrained('./gpt2', local_files_only = True)
 
-    text = "how are you?"
+    text = "Write a poem about a lonely robot exploring a distant planet."
     encoded_input = tokenizer.encode(text, return_tensors='pt')
 
-    output = model.generate(encoded_input)
+    start_time = time.time()
+    output = model(encoded_input)
+    end_time = time.time()
 
-    output_text = tokenizer.decode(output[0])
-
-    print(output_text)
+    execution_time = end_time - start_time
+    print("Execution time:", execution_time, "seconds")
 
     _ = create_layer_config(model)
 

@@ -14,7 +14,7 @@ def generate_embedding(
     assert len(embeddings) == vocab_size
     assert len(embeddings[0]) == embedding_size
     output_file_path = f"{OUTPUT_DIR}/{name}_embedding.c"
-    template_path = "../generation_templates/embedding.c.template"
+    template_path = "./generation_templates/embedding.c.template"
 
     with open(template_path) as template:
         template_text = template.read()
