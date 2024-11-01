@@ -1,0 +1,57 @@
+// START_METHODS
+#include <arm_neon.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+
+/**
+ * Carries out a linear transformation on the input.
+ * For an input I and  linear transformation matrix L, it computes
+ * y = I * L.transpose
+ * Shape of I -> [s, in_features]
+ * Shape of L -> [out_features, in_features]
+ *
+ * y = I * L.transpose -> [s, in_features] * [in_features, out_features] -> [s,
+ * out_features]
+ */
+void {NAME}_linear(float32_t** input, float32_t** output) {
+    // MAT_MULTIPLY_TRANSPOSE a=input,b={linear_weights},c=output r={SEQUENCE_LENGTH},c={LINEAR_OUT_FEATURES},inner={EMBEDDING_SIZE}
+}
+
+// START_TEST
+int main(int argc, char** argv) {
+    float32_t** input = (float32_t**)malloc(sizeof(float32_t*) * {SEQUENCE_LENGTH});
+    float32_t** output = (float32_t**)malloc(sizeof(float32_t*) * {EMBEDDING_SIZE});
+
+    for (int i = 0; i < {SEQUENCE_LENGTH}; i += 1) {
+        input[i] = (float32_t*)malloc(sizeof(float32_t) * {EMBEDDING_SIZE});
+        // Set input as [1.0, 2.0, 3.0, 4.0 ... ]
+        for (int j = 0; j < {EMBEDDING_SIZE}; j += 1) {
+            input[i][j] = (j + 1) * 1.0;
+        }
+    }
+    for (int i = 0 ; i < {EMBEDDING_SIZE}; i += 1) {
+        output[i] = (float32_t*)malloc(sizeof(float32_t) * {LINEAR_OUT_FEATURES});
+        memset(output[i], 0.0, sizeof(float32_t) * {LINEAR_OUT_FEATURES});
+    }
+
+    {NAME}_linear(input, output);
+
+
+    for (int i = 0; i < {SEQUENCE_LENGTH}; i += 1) {
+        printf("Sequence %d Input\n", i);
+        for (int j = 0; j < {EMBEDDING_SIZE}; j += 1) {
+            printf("idx %d -> %f\n", j,  input[i][j]);
+        }
+
+        printf("Sequence %d Output\n", i);
+        for (int j = 0; j < {LINEAR_OUT_FEATURES}; j += 1) {
+            printf("idx %d -> %f\n", j,  output[i][j]);
+        }
+    }
+
+    return 0;
+}
+// END_TEST
+// END_METHODS

@@ -66,21 +66,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-// Conv1D c_attn
-// Matrix with shape [{C_ATTN_EMBEDDING_SIZE_ROW}, {C_ATTN_EMBEDDING_SIZE_COL}]
-float32_t** {NAME}_c_attn_weights = NULL;
-// Vector of size {C_ATTN_EMBEDDING_SIZE_COL}
-float32_t* {NAME}_c_attn_bias = NULL;
-
-// Conv1D c_proj
-// Matrix with shape [{C_PROJ_EMBEDDING_SIZE_ROW}, {C_PROJ_EMBEDDING_SIZE_COL}]
-float32_t** {NAME}_c_proj_weights = NULL;
-// Vector of size {C_PROJ_EMBEDDING_SIZE_COL}
-float32_t* {NAME}_c_proj_bias = NULL;
-
-
-
 // Matrix of size [{SEQUENCE_LENGTH}, {C_ATTN_EMBEDDING_SIZE_COL}]
 // used for storing intermediate values in c_attn conv1d step
 float32_t** {NAME}_c_attn_temp = NULL;
@@ -125,8 +110,11 @@ void {NAME}_initialize_heap_memory() {
 }
 
 static inline void {NAME}_apply_c_attn_conv1d(float32_t** input, float32_t** output) {
+    // Conv1D c_attn
+    // Matrix with shape [{C_ATTN_EMBEDDING_SIZE_ROW}, {C_ATTN_EMBEDDING_SIZE_COL}]
     // MAT_MULTIPLY a=input,b={c_attn_weight},c=output r={SEQUENCE_LENGTH},c={C_ATTN_EMBEDDING_SIZE_COL},inner={EMBEDDING_SIZE}
 
+    // Vector of size {C_ATTN_EMBEDDING_SIZE_COL}
     // MAT_ROW_ADD_VEC1D a=output,b={c_attn_bias} r={SEQUENCE_LENGTH},c={C_ATTN_EMBEDDING_SIZE_COL}
 }
 
@@ -225,8 +213,11 @@ static inline void {NAME}_compute_multihead_attention(float32_t** input, float32
 
 
 static void {NAME}_apply_c_proj_conv1d(float32_t** input, float32_t** output) {
+    // Conv1D c_proj
+    // Matrix with shape [{C_PROJ_EMBEDDING_SIZE_ROW}, {C_PROJ_EMBEDDING_SIZE_COL}]
     // MAT_MULTIPLY a=input,b={c_proj_weight},c=output r={SEQUENCE_LENGTH},c={EMBEDDING_SIZE},inner={EMBEDDING_SIZE}
 
+    // Vector of size {C_PROJ_EMBEDDING_SIZE_COL}
     // MAT_ROW_ADD_VEC1D a=output,b={c_proj_bias} r={SEQUENCE_LENGTH},c={C_PROJ_EMBEDDING_SIZE_COL}
 }
 
