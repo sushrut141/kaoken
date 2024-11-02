@@ -1,29 +1,36 @@
 from typing import List
 
-import re
 import utils
 
 OUTPUT_DIR = "./generated"
 
 
-def generate_linear(
+def generate_mlp(
         name: str,
-        linear_weights: List[List[float]],
+        c_fc_weight: List[List[float]],
+        c_fc_bias: List[float],
+        c_proj_weight: List[List[float]],
+        c_proj_bias: List[float],
         sequence_length: int,
-        embedding_size: int,
-        generate_test_main: bool=False):
+        generate_test_main: bool = False):
     """
-    Generates source code for linear transformation layer.
+    Generates source code for MLP layer.
     """
-    assert len(linear_weights) > 0
-    
-    out_features = len(linear_weights)
+    assert len(c_fc_weight) > 0
+    assert len(c_proj_weight) > 0
+    assert len(c_fc_weight[0]) == len(c_fc_bias)
+    assert len(c_proj_weight[0]) == len(c_proj_bias)
 
-    output_file_path = f"{OUTPUT_DIR}/{name}_linear.c"
-    template_path = "./generation_templates/linear.c.template"
+    embedding_size = len(c_fc_weight)
+
+    output_file_path = f"{OUTPUT_DIR}/{name}_mlp.c"
+    template_path = "./generation_templates/mlp.c.template"
 
     bag_of_tokens = {}
-    utils.populate_2d_weights_in_bag(bag_of_tokens, linear_weights, '{linear_weights}')
+    utils.populate_2d_weights_in_bag(bag_of_tokens, c_fc_weight, '{c_fc_weight}')
+    utils.populate_2d_weights_in_bag(bag_of_tokens, c_proj_weight, '{c_proj_weight}')
+    utils.populate_1d_weights_in_bag(bag_of_tokens, c_fc_bias, '{c_fc_bias}')
+    utils.populate_1d_weights_in_bag(bag_of_tokens, c_proj_bias, '{c_proj_bias}')
 
     with open(template_path) as template:
         template_text = template.read()
@@ -32,7 +39,6 @@ def generate_linear(
         # replace placeholder variables
         implementation = implementation.replace("{NAME}", name)
         implementation = implementation.replace("{SEQUENCE_LENGTH}", str(sequence_length))
-        implementation = implementation.replace("{LINEAR_OUT_FEATURES}", str(out_features))
         implementation = implementation.replace("{EMBEDDING_SIZE}", str(embedding_size))
 
         source = utils.unroll_loops(implementation, bag_of_tokens)
@@ -43,6 +49,8 @@ def generate_linear(
             print("post processing line ", line)
             if "MAT_MULTIPLY_TRANSPOSE" in line:
                 source += utils.generate_mat_multiply_transpose_source(line, bag_of_tokens)
+            elif "MAT_ROW_ADD_VEC1D" in line:
+                source += utils.generate_mat_row_add_vec1D(line, bag_of_tokens)
             elif "MAT_MULTIPLY" in line:
                 source += utils.generate_mat_multiply_source(line, bag_of_tokens)
             else:
@@ -55,21 +63,20 @@ def generate_linear(
             of.write(source)
 
 
+def get_conv1d_weights(nx, nf):
+    return [
+        [
+            (i* 0.001) for i in range(nf)
+        ] for _ in range(nx)
+    ]
+
 if __name__ == "__main__":
-    generate_linear(
-        name="gpt2_linear",
-        linear_weights=[
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4],
-        ],
-        sequence_length=1,
-        embedding_size=4,
-        out_features=8,
+    generate_mlp(
+        name="gpt2_mlp",
+        c_fc_weight=get_conv1d_weights(4, 16),
+        c_fc_bias=[0 for _ in range(16)],
+        c_proj_weight=get_conv1d_weights(16, 4),
+        c_proj_bias=[0 for _ in range(4)],
+        sequence_length=4,
         generate_test_main = True
     )

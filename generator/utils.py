@@ -5,9 +5,11 @@ import re
 # List of regexes to check for when processing source.
 REGEXES = [
     (r"{c_attn_weight}\[(\d+)\]\[(\d+)\]", "{c_attn_weight}"),
+    (r"{c_fc_weight}\[(\d+)\]\[(\d+)\]", "{c_fc_weight}"),
     (r"{c_proj_weight}\[(\d+)\]\[(\d+)\]", "{c_proj_weight}"),
     (r"{linear_weights}\[(\d+)]\[(\d+)\]", "{linear_weights}"),
     (r"{c_attn_bias}\[(\d+)\]", "{c_attn_bias}"),
+    (r"{c_fc_bias}\[(\d+)\]", "{c_fc_bias}"),
     (r"{c_proj_bias}\[(\d+)\]", "{c_proj_bias}")
 ]
 
@@ -78,7 +80,7 @@ def generate_mat_multiply_source(input: str, bag_of_tokens) -> str:
     ranges = {}
     for i, tup in enumerate(temp[3].split(',')):
         key, val = tup.split('=')
-        ranges[key.strip()] = int(val.strip())
+        ranges[key.strip()] = int(eval(val.strip()))
     assert len(params) == 3, " Format must be r=4,c=5,inner=6"
     assert 'r' in ranges, " Format must be r=4,c=5,inner=6"
     assert 'c' in ranges, " Format must be r=4,c=5,inner=6"
@@ -162,7 +164,7 @@ def generate_mat_row_add_vec1D(line: str, bag_of_tokens: Mapping[str, str]) -> s
     ranges = {}
     for _, tup in enumerate(temp[3].split(',')):
         key, val = tup.split('=')
-        ranges[key.strip()] = int(val.strip())
+        ranges[key.strip()] = int(eval(val.strip()))
     assert len(params) == 2, " Format must be r=4,c=5"
     assert 'r' in ranges, " Format must be r=4,c=5"
     assert 'c' in ranges, " Format must be r=4,c=5"

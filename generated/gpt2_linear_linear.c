@@ -34,7 +34,7 @@ void gpt2_linear_linear(float32_t **input, float32_t **output) {
 }
 
 // START_TEST
-int main(int argc, char **argv) {
+int linear_test(int argc, char **argv) {
     float32_t **input = (float32_t **)malloc(sizeof(float32_t *) * 1);
     float32_t **output = (float32_t **)malloc(sizeof(float32_t *) * 4);
 

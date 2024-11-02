@@ -20,10 +20,10 @@ def generate_attention(
         c_proj_bias: List[float],
         num_heads: int,
         sequence_length: int,
-        embedding_size: int,
-        generate_test_main: bool):
+        generate_test_main: bool = False):
     assert len(c_attn_weight) > 0
-    assert len(c_attn_weight[0]) == 3 * embedding_size
+    assert len(c_attn_weight[0]) == 3 * len(c_attn_weight)
+    embedding_size = len(c_attn_weight)
 
     output_file_path = f"{OUTPUT_DIR}/{name}_attention.c"
     template_path = "./generation_templates/attention.c.template"
@@ -89,7 +89,6 @@ def generate_attention_from_gpt2_pretrained():
         **obj,
         num_heads=12,
         sequence_length=4,
-        embedding_size=768,
         generate_test_main= False
     )
 
@@ -112,7 +111,6 @@ if __name__ == "__main__":
         c_proj_bias = torch.zeros(4).tolist(),
         num_heads=2,
         sequence_length=1,
-        embedding_size=8,
         generate_test_main= True
     )
     # generate_attention_from_gpt2_pretrained()

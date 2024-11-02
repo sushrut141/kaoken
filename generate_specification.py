@@ -18,7 +18,8 @@ def create_layer_config(model):
     module_config = []
     for name, module in model.named_modules():
         temp = {}
-        if name:
+        # skip to level module
+        if name and (name == 'transformer' or name == 'lm_head'):
             temp[name] = {
                 'name': name,
                 'type': module.__class__.__name__,
@@ -30,7 +31,7 @@ def create_layer_config(model):
                 param_temp['dimensions'] = list(param.shape)
                 temp['params'].append(param_temp)
                 if DUMP_WEIGHTS:
-                    with open(f"./weights/{param_name}.json", 'w+') as w:
+                    with open(f"./weights/{name}.{param_name}.json", 'w+') as w:
                         w.write(json.dumps(param.tolist(), indent=4))
             module_config.append(temp)
     with open('./gpt_specification.json', 'w+') as f:

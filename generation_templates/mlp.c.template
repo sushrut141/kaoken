@@ -1,0 +1,95 @@
+// START_METHODS
+#include <arm_neon.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+
+// Matrix of size [{SEQUENCE_LENGTH}, 4 * {EMBEDDING_SIZE}]
+// used for storing intermediate values in c_fc conv1d step
+float32_t** {NAME}_c_fc_temp = NULL;
+// Matrix of size [{SEQUENCE_LENGTH}, 4 * {EMBEDDING_SIZE}]
+// used for storing intermediate values in gelu activation step
+float32_t** {NAME}_gelu_temp = NULL;
+
+// Initializes the weights used in the attention layer.
+// Must be called before calling {NAME}_attention.
+void {NAME}_initialize_heap_memory() {
+    {NAME}_c_fc_temp = (float32_t**)malloc(sizeof(float32_t*) * {SEQUENCE_LENGTH});
+    {NAME}_gelu_temp = (float32_t**)malloc(sizeof(float32_t*) * {SEQUENCE_LENGTH});
+
+    // UNROLL_START start=0,end={SEQUENCE_LENGTH} param1=idx
+    {NAME}_c_fc_temp[param1] = (float32_t*)malloc(sizeof(float32_t) *  4 * {EMBEDDING_SIZE});
+    {NAME}_gelu_temp[param1] = (float32_t*)malloc(sizeof(float32_t) *  4 * {EMBEDDING_SIZE});
+    // UNROLL_END
+}
+
+// 0.5 * input * (1.0 + torch.tanh(math.sqrt(2.0 / math.pi) * (input + 0.044715 * torch.pow(input, 3.0))))
+inline void {NAME}_new_gelu_activation(float32_t* input, float32_t* output) {
+    // UNROLL_START start=0,end=(4*{EMBEDDING_SIZE}) param1=idx
+    output[param1] = input[param1] + (0.044715 * pow(input[param1], 3));
+    output[param1] *= sqrt(2.0 / 3.14159);
+    output[param1] = 1.0 + tanh(output[param1]);
+    output[param1] = 0.5 * input[param1] * output[param1];
+    // UNROLL_END
+}
+
+/**
+ * Carries out transformations on the inout per the MLP block in transformer
+ * which is composed of two conv1d transformations and an activation.
+ */
+void {NAME}_mlp(float32_t** input, float32_t** output) {
+    // Conv1D c_fc
+    // Matrix with shape [{EMBEDDING_SIZE}, 4 * {EMBEDDING_SIZE}]
+    // MAT_MULTIPLY a=input,b={c_fc_weight},c={NAME}_c_fc_temp r={SEQUENCE_LENGTH},c=(4*{EMBEDDING_SIZE}),inner={EMBEDDING_SIZE}
+
+    // Vector of size (4*{EMBEDDING_SIZE}
+    // MAT_ROW_ADD_VEC1D a={NAME}_c_fc_temp,b={c_fc_bias} r={SEQUENCE_LENGTH},c=(4*{EMBEDDING_SIZE})
+
+    // UNROLL_START start=0,end={SEQUENCE_LENGTH} param1=idx
+    {NAME}_new_gelu_activation({NAME}_c_fc_temp[param1], {NAME}_gelu_temp[param1]);
+    // UNROLL_END
+
+    // Conv1D c_proj
+    // Matrix with shape [4 * {EMBEDDING_SIZE}, {EMBEDDING_SIZE}]
+    // MAT_MULTIPLY a={NAME}_gelu_temp,b={c_proj_weight},c=output r={SEQUENCE_LENGTH},c={EMBEDDING_SIZE},inner=(4*{EMBEDDING_SIZE})
+
+    // Vector of size {EMBEDDING_SIZE}
+    // MAT_ROW_ADD_VEC1D a=output,b={c_proj_bias} r={SEQUENCE_LENGTH},c={EMBEDDING_SIZE}
+}
+
+// START_TEST
+int main(int argc, char** argv) {
+    float32_t** input = (float32_t**)malloc(sizeof(float32_t*) * {SEQUENCE_LENGTH});
+    float32_t** output = (float32_t**)malloc(sizeof(float32_t*) * {SEQUENCE_LENGTH});
+
+    for (int i = 0; i < {SEQUENCE_LENGTH}; i += 1) {
+        input[i] = (float32_t*)malloc(sizeof(float32_t) * {EMBEDDING_SIZE});
+        output[i] = (float32_t*)malloc(sizeof(float32_t) * {EMBEDDING_SIZE});
+        // Set input as [1.0, 2.0, 3.0, 4.0 ... ]
+        for (int j = 0; j < {EMBEDDING_SIZE}; j += 1) {
+            input[i][j] = (j + 1) * 1.0;
+        }
+    }
+
+    {NAME}_initialize_heap_memory();
+
+    {NAME}_mlp(input, output);
+
+
+    for (int i = 0; i < {SEQUENCE_LENGTH}; i += 1) {
+        printf("Sequence %d Input\n", i);
+        for (int j = 0; j < {EMBEDDING_SIZE}; j += 1) {
+            printf("idx %d -> %f\n", j,  input[i][j]);
+        }
+
+        printf("Sequence %d Output\n", i);
+        for (int j = 0; j < {EMBEDDING_SIZE}; j += 1) {
+            printf("idx %d -> %f\n", j,  output[i][j]);
+        }
+    }
+
+    return 0;
+}
+// END_TEST
+// END_METHODS

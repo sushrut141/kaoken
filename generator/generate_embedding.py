@@ -6,13 +6,14 @@ import utils
 OUTPUT_DIR = "./generated"
 
 def generate_embedding(
-        name: str, embeddings: List[List[float]], vocab_size: int, embedding_size: int):
+        name: str, embeddings: List[List[float]]):
     """
     Generates source code for embedding lookup layer.
     """
     assert len(embeddings) > 0
-    assert len(embeddings) == vocab_size
-    assert len(embeddings[0]) == embedding_size
+    vocab_size = len(embeddings)
+    embedding_size = len(embeddings[0])
+
     output_file_path = f"{OUTPUT_DIR}/{name}_embedding.c"
     template_path = "./generation_templates/embedding.c.template"
 
@@ -45,7 +46,5 @@ if __name__ == "__main__":
             [0.1, 0.2, 0.3, 0.4],
             [0.1, 0.2, 0.3, 0.4],
             [0.1, 0.2, 0.3, 0.4]
-        ],
-        vocab_size=4,
-        embedding_size=4
+        ]
     )

@@ -7,9 +7,9 @@ OUTPUT_DIR = "./generated"
 
 
 def generate_gelu_activation(
-        name: str, size: int, generate_test_main: bool):
+        name: str, size: int, generate_test_main: bool = False):
     """
-    Generates source code for baked layer normalization.
+    Generates source code for GELU activation.
     """
 
     output_file_path = f"{OUTPUT_DIR}/{name}_new_gelu_activation.c"

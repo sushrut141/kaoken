@@ -7,12 +7,12 @@ OUTPUT_DIR = "./generated"
 
 
 def generate_layer_normalization(
-        name: str, weights: List[float], bias: List[float], size: int, generate_test_main: bool):
+        name: str, weights: List[float], bias: List[float], generate_test_main: bool = False):
     """
     Generates source code for baked layer normalization.
     """
-    assert len(weights) == size
-    assert len(bias) == size
+    assert len(weights) == len(bias)
+    size = len(weights)
     output_file_path = f"{OUTPUT_DIR}/{name}_layer_norm.c"
     template_path = "./generation_templates/layer_norm.c.template"
 
