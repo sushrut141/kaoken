@@ -5,7 +5,7 @@ import time
 import os
 
 # Dump weights to disk to generate baked source.
-DUMP_WEIGHTS = False
+DUMP_WEIGHTS = True
 
 def create_layer_config(model):
     """

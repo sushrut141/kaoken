@@ -10,7 +10,7 @@ from generate_linear import generate_linear
 
 def load_weights(path):
     f = open(f"./weights/{path}", 'r')
-    return json.load(f)
+    return json.loads(f.read())
 
 
 # Reference for blocks: https://huggingface.co/transformers/v4.11.3/_modules/transformers/models/gpt2/modeling_gpt2.html
@@ -48,21 +48,6 @@ def generate(
         num_of_heads: int):
     assert os.path.isdir('./weights'), "Layer weights must be present in the weights directory. Try running generate_specification.py with DUMP_WEIGHTS=True."
 
-    generate_embedding(
-        name="transformer.wte.weight",
-        embeddings=load_weights("transformer.wte.weight.json")
-    )
-    generate_embedding(
-        name="transformer.wpe.weight",
-        embeddings=load_weights("transformer.wpe.weight.json")
-    )
-    generate_linear(
-        name="lm_head",
-        linear_weights=load_weights("lm_head.weight.json"),
-        sequence_length=sequence_length,
-        embedding_size=768
-    )
-
     for i in range(num_of_blocks):
         layer_norm_1 = f"transformer.h.{i}.ln_1"
         layer_norm_2 = f"transformer.h.{i}.ln_2"
@@ -74,18 +59,18 @@ def generate(
         c_mlp_proj = f"transformer.h.{i}.mlp.c_proj"
 
         generate_layer_normalization(
-            name=layer_norm_1,
+            name=layer_norm_1.replace('.', '_'),
             weights=load_weights(f"{layer_norm_1}.weight.json"),
             bias=load_weights(f"{layer_norm_1}.bias.json")
         )
         generate_layer_normalization(
-            name=layer_norm_2,
+            name=layer_norm_2.replace('.', '_'),
             weights=load_weights(f"{layer_norm_2}.weight.json"),
             bias=load_weights(f"{layer_norm_2}.bias.json")
         )
 
         generate_attention(
-            name=attn,
+            name=attn.replace('.', '_'),
             c_attn_weight=load_weights(f"{c_attn}.weight.json"),
             c_attn_bias=load_weights(f"{c_attn}.bias.json"),
             c_proj_weight=load_weights(f"{c_proj}.weight.json"),
@@ -94,18 +79,33 @@ def generate(
             sequence_length=sequence_length
         )
         generate_mlp(
-            name=mlp,
+            name=mlp.replace('.', '_'),
             c_fc_weight=load_weights(f"{c_mlp_fc}.weight.json"),
             c_fc_bias=load_weights(f"{c_mlp_fc}.bias.json"),
             c_proj_weight=load_weights(f"{c_mlp_proj}.weight.json"),
             c_proj_bias=load_weights(f"{c_mlp_proj}.bias.json"),
             sequence_length=sequence_length
         )
+    
+    generate_embedding(
+        name="transformer_wte_weight",
+        embeddings=load_weights("transformer.wte.weight.json")
+    )
+    generate_embedding(
+        name="transformer_wpe_weight",
+        embeddings=load_weights("transformer.wpe.weight.json")
+    )
+    generate_linear(
+        name="lm_head",
+        linear_weights=load_weights("lm_head.weight.json"),
+        sequence_length=sequence_length,
+        embedding_size=768
+    )
         
 
 if __name__ == "__main__":
     generate(
         sequence_length=4,
         num_of_blocks=1,
-        num_of_heads=1
+        num_of_heads=12
     )
