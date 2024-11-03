@@ -39,8 +39,7 @@ def generate_layer_normalization(
 if __name__ == "__main__":
     generate_layer_normalization(
         name= "gpt2_layer_norm_1",
-        weights=[0.1, 0.1, 0.1, 0.1],
-        bias=[0.1, 0.1, 0.1, 0.1],
-        size=4,
+        weights=[(0.1 * i) for i in range(4)],
+        bias=[(0.2 * i) for i in range(4)],
         generate_test_main=True
     )

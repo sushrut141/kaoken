@@ -2,11 +2,11 @@
 #include <arm_neon.h>
 #include <math.h>
 #include <stdio.h>
+#include <time.h>
 
 // 0.5 * input * (1.0 + torch.tanh(math.sqrt(2.0 / math.pi) * (input + 0.044715
 // * torch.pow(input, 3.0))))
-inline void gpt2_gelu_1_new_gelu_activation(float32_t *input,
-                                            float32_t *output) {
+void gpt2_gelu_1_new_gelu_activation(float32_t *input, float32_t *output) {
     output[0] = input[0] + (0.044715 * pow(input[0], 3));
     output[0] *= sqrt(2.0 / 3.14159);
     output[0] = 1.0 + tanh(output[0]);
@@ -26,15 +26,22 @@ inline void gpt2_gelu_1_new_gelu_activation(float32_t *input,
 }
 
 // START_TEST
-int gelu_test(int argc, char **argv) {
+int main(int argc, char **argv) {
     float input[4];
     float output[4];
 
     for (int i = 0; i < 4; i += 1) {
-        input[i] = 0.1 * (i + 1);
+        input[i] = 0.1;
     }
 
+    clock_t start, end;
+    double cpu_time_used;
+
+    start = clock();
     gpt2_gelu_1_new_gelu_activation(input, output);
+    end = clock();
+    cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+    printf("Time taken: %f milli seconds\n", cpu_time_used * 1000.0);
 
     for (int i = 0; i < 4; i += 1) {
         printf("%f\n", output[i]);

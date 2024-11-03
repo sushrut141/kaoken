@@ -142,9 +142,15 @@ The following layers are involved in reproducing the GPT2 model
 
  ## Benchmark Results
 
-TBD
+ Benchmarks will be carrried out in two stages, benchmarks for individual layers on inputs with
+ the same dimeions used in GPT2 followed by end to end benchmark that evaluates time taken to complete one generation cycle by calling `model.generate()`.
 
- ###
+ Benchmarks have been recorded by instrumenting the scripts in the validation directory with `time.time()` calls to record the time taken to only execute layer transformation excluding setup code. Numbers below are the everage of five runs.
+
+| Layer               | Input Shape | PyTorch (ms) | Kaoken (ms) |
+|---------------------|-------------|--------------|-------------|
+| Layer Normalization | [1, 768]    | 0.052        | 0.0052      |
+| GELU Activation     | [1, 768]    | 0.174        | 0.084       |
 
 ## GTP2 architecture and layer shapes
 

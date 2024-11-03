@@ -2,12 +2,12 @@
 #include <arm_neon.h>
 #include <math.h>
 #include <stdio.h>
+#include <time.h>
 
-const float WEIGHT_TABLE[4] = {0.1, 0.1, 0.1, 0.1};
-const float BIAS_TABLE[4] = {0.1, 0.1, 0.1, 0.1};
+const float WEIGHT_TABLE[4] = {0.0, 0.1, 0.2, 0.30000000000000004};
+const float BIAS_TABLE[4] = {0.0, 0.2, 0.4, 0.6000000000000001};
 
-inline void gpt2_layer_norm_1_layer_normalize(float32_t *input,
-                                              float32_t *output) {
+void gpt2_layer_norm_1_layer_normalize(float32_t *input, float32_t *output) {
     // calculate mean
     float32x4_t sum_vec = vld1q_f32(input);
     float32_t sum = vaddvq_f32(sum_vec);
@@ -46,7 +46,7 @@ inline void gpt2_layer_norm_1_layer_normalize(float32_t *input,
 }
 
 // START_TEST
-int layer_norm_test(int argc, char **argv) {
+int main(int argc, char **argv) {
     float input[4];
     float output[4];
 
@@ -54,7 +54,14 @@ int layer_norm_test(int argc, char **argv) {
         input[i] = 0.1 * (i + 1);
     }
 
+    clock_t start, end;
+    double cpu_time_used;
+
+    start = clock();
     gpt2_layer_norm_1_layer_normalize(input, output);
+    end = clock();
+    cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+    printf("Time taken: %f milli seconds\n", cpu_time_used * 1000.0);
 
     for (int i = 0; i < 4; i += 1) {
         printf("%f\n", output[i]);

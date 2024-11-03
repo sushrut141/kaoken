@@ -15,26 +15,18 @@
  * out_features]
  */
 void gpt2_linear_linear(float32_t **input, float32_t **output) {
-    output[0][0] = (input[0][0] * 0.1) + (input[0][1] * 0.2) +
-                   (input[0][2] * 0.3) + (input[0][3] * 0.4);
-    output[0][1] = (input[0][0] * 0.1) + (input[0][1] * 0.2) +
-                   (input[0][2] * 0.3) + (input[0][3] * 0.4);
-    output[0][2] = (input[0][0] * 0.1) + (input[0][1] * 0.2) +
-                   (input[0][2] * 0.3) + (input[0][3] * 0.4);
-    output[0][3] = (input[0][0] * 0.1) + (input[0][1] * 0.2) +
-                   (input[0][2] * 0.3) + (input[0][3] * 0.4);
-    output[0][4] = (input[0][0] * 0.1) + (input[0][1] * 0.2) +
-                   (input[0][2] * 0.3) + (input[0][3] * 0.4);
-    output[0][5] = (input[0][0] * 0.1) + (input[0][1] * 0.2) +
-                   (input[0][2] * 0.3) + (input[0][3] * 0.4);
-    output[0][6] = (input[0][0] * 0.1) + (input[0][1] * 0.2) +
-                   (input[0][2] * 0.3) + (input[0][3] * 0.4);
-    output[0][7] = (input[0][0] * 0.1) + (input[0][1] * 0.2) +
-                   (input[0][2] * 0.3) + (input[0][3] * 0.4);
+    output[0][0] = (input[0][0] * 0.1) + (input[0][1] * 0.1) +
+                   (input[0][2] * 0.1) + (input[0][3] * 0.1);
+    output[0][1] = (input[0][0] * 0.1) + (input[0][1] * 0.1) +
+                   (input[0][2] * 0.1) + (input[0][3] * 0.1);
+    output[0][2] = (input[0][0] * 0.1) + (input[0][1] * 0.1) +
+                   (input[0][2] * 0.1) + (input[0][3] * 0.1);
+    output[0][3] = (input[0][0] * 0.1) + (input[0][1] * 0.1) +
+                   (input[0][2] * 0.1) + (input[0][3] * 0.1);
 }
 
 // START_TEST
-int linear_test(int argc, char **argv) {
+int main(int argc, char **argv) {
     float32_t **input = (float32_t **)malloc(sizeof(float32_t *) * 1);
     float32_t **output = (float32_t **)malloc(sizeof(float32_t *) * 4);
 
@@ -46,8 +38,8 @@ int linear_test(int argc, char **argv) {
         }
     }
     for (int i = 0; i < 4; i += 1) {
-        output[i] = (float32_t *)malloc(sizeof(float32_t) * 8);
-        memset(output[i], 0.0, sizeof(float32_t) * 8);
+        output[i] = (float32_t *)malloc(sizeof(float32_t) * 4);
+        memset(output[i], 0.0, sizeof(float32_t) * 4);
     }
 
     gpt2_linear_linear(input, output);
@@ -59,7 +51,7 @@ int linear_test(int argc, char **argv) {
         }
 
         printf("Sequence %d Output\n", i);
-        for (int j = 0; j < 8; j += 1) {
+        for (int j = 0; j < 4; j += 1) {
             printf("idx %d -> %f\n", j, output[i][j]);
         }
     }

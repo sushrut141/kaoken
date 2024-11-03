@@ -1,3 +1,4 @@
+import time
 import torch
 import math
 from torch import nn
@@ -14,7 +15,11 @@ class NewGELUActivation(nn.Module):
     
 
 if __name__ == "__main__":
-    input = torch.tensor([0.1, 0.2, 0.3, 0.4])
+    input = torch.tensor([0.1 for _ in range(768)])
     activation = NewGELUActivation()
+    start_time = time.time()
     output = activation(input)
-    print(output.tolist())
+    end_time = time.time()
+    execution_time_ms = (end_time - start_time) * 1000
+    print("Layer Normalization Execution time:", execution_time_ms, "milli seconds")
+    print(output.tolist()[:10])
