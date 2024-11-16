@@ -65,6 +65,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 // Matrix of size [{SEQUENCE_LENGTH}, {C_ATTN_EMBEDDING_SIZE_COL}]
 // used for storing intermediate values in c_attn conv1d step
@@ -146,6 +147,7 @@ static inline void {NAME}_softmax_compute(float32_t* input, int16_t seq_idx) {
     // Use 64 bit floats to avoid overflow when computing exp(x).
     float64_t seq_sum = 0.0;
     // Compute the sum of exponents for each elemt in sequence that is not masked
+    // NOTE: `expl` blows up to give NaN when the input is too large which is expected
     // UNROLL_START start=0,end=({SEQUENCE_LENGTH}) param1=idx
     seq_sum += expl((float64_t)input[param1 + (seq_idx * {SEQUENCE_LENGTH})]) * {NAME}_multi_head_attention_mask[seq_idx][param1];
     // UNROLL_END
@@ -268,7 +270,14 @@ int main(int argc, char** argv) {
 
     {NAME}_initialize_heap_memory();
 
+    clock_t start, end;
+    double cpu_time_used;
+
+    start = clock();
     {NAME}_attention(input, output);
+    end = clock();
+    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    printf("Time taken: %f milli seconds\n", cpu_time_used * 1000.0);
 
 
     for (int i = 0; i < {SEQUENCE_LENGTH}; i += 1) {

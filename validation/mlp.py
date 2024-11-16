@@ -1,6 +1,9 @@
 import torch
 from torch import nn
 import math
+import time
+
+device = torch.device("cpu")
 
 def get_conv1d_weights(nx, nf):
     return [
@@ -58,29 +61,37 @@ class GPT2MLP(nn.Module):
 
 
 def create_mlp():
-    mlp = GPT2MLP(16, 4)
+    mlp = GPT2MLP(3072, 768)
     return mlp
 
 
 # Generates input output pair for the GPT2MLP layer that
 # can be used to validate output of baked attention layer.
-def generate_base_output(attention):
+def generate_base_output(mlp):
     sequence = torch.tensor(
         # Batch Size 1
         [
             # Sequence Length 1
             [
                 # Embedding Size 4
-                [1.0, 2.0, 3.0, 4.0]
+                [0.1 for _ in range(768)]
             ]
-        ]
+        ],
+        device=device
     )
-    output = attention.forward(sequence)
+    for _ in range(5):
+        start_time = time.time()
+        output = mlp.forward(sequence)
+        end_time = time.time()
+
+        execution_time_ms = (end_time - start_time) * 1000
+        print("MLP Layer Execution Time:", execution_time_ms, "milli seconds")
+
     return (sequence.tolist(), output)
 
 if __name__ == "__main__":
-    attention = create_mlp()
+    mlp = create_mlp()
 
-    input, output = generate_base_output(attention)
-    print('Input', input)
-    print('Output', output[0].tolist())
+    input, output = generate_base_output(mlp)
+    # print('Input', input)
+    # print('Output', output[0].tolist())

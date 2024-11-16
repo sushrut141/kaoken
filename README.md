@@ -143,14 +143,19 @@ The following layers are involved in reproducing the GPT2 model
  ## Benchmark Results
 
  Benchmarks will be carrried out in two stages, benchmarks for individual layers on inputs with
- the same dimeions used in GPT2 followed by end to end benchmark that evaluates time taken to complete one generation cycle by calling `model.generate()`.
+ the same dimensions used in GPT2 followed by end to end benchmark that evaluates time taken to complete one generation cycle by calling `model.generate()`.
 
- Benchmarks have been recorded by instrumenting the scripts in the validation directory with `time.time()` calls to record the time taken to only execute layer transformation excluding setup code. Numbers below are the everage of five runs.
+ Benchmarks have been recorded by instrumenting the scripts in the validation directory with `time.time()` calls to record the time taken to only execute layer transformation excluding setup code. Numbers below are the average of five runs.
 
-| Layer               | Input Shape | PyTorch (ms) | Kaoken (ms) |
-|---------------------|-------------|--------------|-------------|
-| Layer Normalization | [1, 768]    | 0.052        | 0.0052      |
-| GELU Activation     | [1, 768]    | 0.174        | 0.084       |
+ **NOTE: Ensure the device you are running on has no form of hardware acceleration like GPU or the results will be skewed**
+
+| Layer               | Input Shape   | PyTorch (ms) | Kaoken (ms) |
+|---------------------|---------------|--------------|-------------|
+| Layer Normalization | [1, 768]      | 0.052        | 0.0052      |
+| GELU Activation     | [1, 768]      | 0.174        | 0.084       |
+| Linear              | [768, 50257]  | 22.4         | 2.378       |
+| Attention           | [1, 768]      | 14.484       | 9.386       |
+| MLP                 | [3072, 768]   | 32.51        |             |
 
 ## GTP2 architecture and layer shapes
 
@@ -196,5 +201,6 @@ Divides float32 values across two SIMD registers and returns a float32x4_t value
 
 
 # TODO
+ - read embedding weights by memory mapping file fom disk
  - get inference working using binary built from c files
  - generalize generation of c files and building binary for any model

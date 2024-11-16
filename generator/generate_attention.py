@@ -100,15 +100,15 @@ def get_conv1d_weights(nx, nf):
     ]
 
 if __name__ == "__main__":
-    c_attn_weight = get_conv1d_weights(8, 24)
-    c_proj_weight = get_conv1d_weights(8, 24)
+    c_attn_weight = get_conv1d_weights(768, 2304)
+    c_proj_weight = get_conv1d_weights(768, 768)
 
     generate_attention(
         name="gpt2_attention_0",
         c_attn_weight = c_attn_weight,
-        c_attn_bias = torch.zeros(24).tolist(),
+        c_attn_bias = torch.zeros(2304).tolist(),
         c_proj_weight = c_proj_weight,
-        c_proj_bias = torch.zeros(4).tolist(),
+        c_proj_bias = torch.zeros(768).tolist(),
         num_heads=2,
         sequence_length=1,
         generate_test_main= True

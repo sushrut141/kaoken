@@ -1,3 +1,4 @@
+import time
 import torch
 from torch import nn
 
@@ -157,8 +158,8 @@ class GPT2AttentionConfig:
 def create_attention_layer():
     config = GPT2AttentionConfig({
         'max_position_embeddings': 1,
-        'hidden_size': 8,
-        'num_attention_heads': 2,
+        'hidden_size': 768,
+        'num_attention_heads': 12,
         'scale_attn_weights': True
     })
     attention = GPT2Attention(config)
@@ -168,22 +169,29 @@ def create_attention_layer():
 # Generates input output pair for the GPT2Attention layer that
 # can be used to validate output of baked attention layer.
 def generate_base_output(attention):
-    sequence = torch.tensor(
-        # Batch Size 1
-        [
-            # Sequence Length 1
+    for _ in range(5):
+        sequence = torch.tensor(
+            # Batch Size 1
             [
-                # Embedding Size 4
-                [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]
+                # Sequence Length 1
+                [
+                    # Embedding Size 4
+                    [1.0 for _ in range(768)]
+                ]
             ]
-        ]
-    )
-    output = attention.forward(sequence)
+        )
+
+        start_time = time.time()
+        output = attention.forward(sequence)
+        end_time = time.time()
+        
+        execution_time_ms = (end_time - start_time) * 1000
+        print("Attention Layer Execution Time:", execution_time_ms, "milli seconds")
     return (sequence.tolist(), output)
 
 if __name__ == "__main__":
     attention = create_attention_layer()
 
     input, output = generate_base_output(attention)
-    print('Input', input)
-    print('Output', output[0].tolist())
+    # print('Input', input)
+    # print('Output', output[0].tolist())

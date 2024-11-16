@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-
+#include <time.h>
 
 /**
  * Carries out a linear transformation on the input.
@@ -36,20 +36,27 @@ int main(int argc, char** argv) {
         memset(output[i], 0.0, sizeof(float32_t) * {LINEAR_OUT_FEATURES});
     }
 
+    clock_t start, end;
+    double cpu_time_used;
+
+    start = clock();
     {NAME}_linear(input, output);
+    end = clock();
+    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    printf("Time taken: %f milli seconds\n", cpu_time_used * 1000.0);
 
 
-    for (int i = 0; i < {SEQUENCE_LENGTH}; i += 1) {
-        printf("Sequence %d Input\n", i);
-        for (int j = 0; j < {EMBEDDING_SIZE}; j += 1) {
-            printf("idx %d -> %f\n", j,  input[i][j]);
-        }
+    // for (int i = 0; i < {SEQUENCE_LENGTH}; i += 1) {
+    //     printf("Sequence %d Input\n", i);
+    //     for (int j = 0; j < {EMBEDDING_SIZE}; j += 1) {
+    //         printf("idx %d -> %f\n", j,  input[i][j]);
+    //     }
 
-        printf("Sequence %d Output\n", i);
-        for (int j = 0; j < {LINEAR_OUT_FEATURES}; j += 1) {
-            printf("idx %d -> %f\n", j,  output[i][j]);
-        }
-    }
+    //     printf("Sequence %d Output\n", i);
+    //     for (int j = 0; j < {LINEAR_OUT_FEATURES}; j += 1) {
+    //         printf("idx %d -> %f\n", j,  output[i][j]);
+    //     }
+    // }
 
     return 0;
 }

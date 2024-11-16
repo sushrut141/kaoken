@@ -5,7 +5,7 @@ CLANG_FORMAT = clang-format
 all: main
 
 main: $(wildcard *.o)
-	$(CC) $(CFLAGS) -o main $(wildcard *.c)
+	$(CC) $(CFLAGS) -o main $(wildcard *.c) -lm
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@

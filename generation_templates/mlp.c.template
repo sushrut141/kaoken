@@ -25,7 +25,7 @@ void {NAME}_initialize_heap_memory() {
 }
 
 // 0.5 * input * (1.0 + torch.tanh(math.sqrt(2.0 / math.pi) * (input + 0.044715 * torch.pow(input, 3.0))))
-inline void {NAME}_new_gelu_activation(float32_t* input, float32_t* output) {
+void {NAME}_new_gelu_activation(float32_t* input, float32_t* output) {
     // UNROLL_START start=0,end=(4*{EMBEDDING_SIZE}) param1=idx
     output[param1] = input[param1] + (0.044715 * pow(input[param1], 3));
     output[param1] *= sqrt(2.0 / 3.14159);

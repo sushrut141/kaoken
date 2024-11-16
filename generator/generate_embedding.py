@@ -42,9 +42,6 @@ if __name__ == "__main__":
     generate_embedding(
         name="gpt2_layer_embedding",
         embeddings=[
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4],
-            [0.1, 0.2, 0.3, 0.4]
+            [0.1 for _ in range(768)] for _ in range(50257)
         ]
     )

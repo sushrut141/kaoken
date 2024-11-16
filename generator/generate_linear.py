@@ -59,9 +59,9 @@ if __name__ == "__main__":
     generate_linear(
         name="gpt2_linear",
         linear_weights=[
-            [0.1 for _ in range(4)] for _ in range(4)
+            [0.1 for _ in range(10)] for _ in range(10)
         ],
         sequence_length=1,
-        embedding_size=4,
+        embedding_size=10,
         generate_test_main = True
     )
